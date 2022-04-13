@@ -235,7 +235,7 @@ MonoBehaviour:
   barTexture: {fileID: 2800000, guid: e9fc42b84fc95fd42902083f9dea7fae, type: 3}
   numSlices: 2
   sliceSideCount: 18
-  rebarRadius: 1
+  rebarRadius: 0.065
   interSliceDistance: 8.19
 --- !u!4 &400814894
 Transform:
