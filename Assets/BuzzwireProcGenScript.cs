@@ -43,6 +43,8 @@ public class BuzzwireProcGenScript : MonoBehaviour
 
 		sliceAngleResolution = 360 / sliceSideCount;
 
+		//0_deg - 8_cm - 45_deg_up - 8_cm - 45_deg_left - 8cm - 45_deg_down - 8cm - 45_deg_forward - 8cm - 45_deg_right - 8cm - 45_deg_forward - 8cm
+
 		for (int i = 0; i < numSlices; i++)
 		{
 			Vector3 centerLoc = new Vector3((i * interSliceDistance), 0.0f, 0.0f);
@@ -147,7 +149,7 @@ public class CylinderSlice
 		uvs = new Vector2[sliceSideCount];
 		float resultantBendAngle = bendAngle;
 
-		yUVStepFactor = currSliceIndex / (float)numSlices;
+		//yUVStepFactor = currSliceIndex / (float)numSlices;
 
 		for (int i = 0; i < sliceSideCount; i++)
 		{
@@ -172,10 +174,10 @@ public class CylinderSlice
 			if (cylFacetype == BuzzwireProcGenScript.CylinderFaceType.side)
 			{
 				normals[i] = new Vector3(0, verts[i].y, verts[i].z);
-				uvs[i] = new Vector2((float)(i / (double)sliceSideCount), yUVStepFactor);
+				//uvs[i] = new Vector2((float)(i / (double)sliceSideCount), yUVStepFactor);
 				//Debug.Log(uvs[i]);
 			}
-			else if (cylFacetype == BuzzwireProcGenScript.CylinderFaceType.edge)
+			/*else if (cylFacetype == BuzzwireProcGenScript.CylinderFaceType.edge)
 			{
 				if (yUVStepFactor == 0.0)
 				{
@@ -187,8 +189,7 @@ public class CylinderSlice
 				}
 
 				uvs[i] = new Vector2(0.1f, 0.1f);
-			}
-
+			}*/
 			//Vector2 test = new Vector2(float.Parse((0.05555556f).ToString("F6")),0.3888889f);
 			//Debug.Log(test);
 
