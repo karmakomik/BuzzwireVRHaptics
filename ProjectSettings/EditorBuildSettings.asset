@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Buzzwire_Vibration.unity
+    guid: 42bd2af1f8ed0314ba20868c8107923a
   m_configObjects: {}

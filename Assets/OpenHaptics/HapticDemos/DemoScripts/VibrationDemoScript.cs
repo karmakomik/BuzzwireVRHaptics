@@ -18,7 +18,7 @@ public class VibrationDemoScript : MonoBehaviour {
 			Debug.LogError("This script requires that Haptic Device be assigned.");
 	}
 
-	void TurnEffectOn()
+	public void TurnEffectOn()
 	{
 		if (HapticDevice == null) return; 		//If there is no device, bail out early.
 
@@ -36,7 +36,7 @@ public class VibrationDemoScript : MonoBehaviour {
 
 		// Send the effect settings to OpenHaptics.
 		double[] pos = {0.0, 0.0, 0.0}; // Position (not used for vibration)
-		double[] dir = {0.0, 1.0, 0.0}; // Direction of vibration
+		double[] dir = {1.0, 1.0, 1.0}; // Direction of vibration
 
 		HapticPlugin.effects_settings(
 			HapticDevice.configName,
@@ -52,7 +52,7 @@ public class VibrationDemoScript : MonoBehaviour {
 		HapticPlugin.effects_startEffect(HapticDevice.configName, FXID );
 	}
 
-	void TurnEffectOff()
+	public void TurnEffectOff()
 	{
 		if (HapticDevice == null) return; 		//If there is no device, bail out early.
 		if (FXID == -1)	return;  				//If there is no effect, bail out early.
