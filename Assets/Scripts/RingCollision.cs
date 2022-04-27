@@ -10,6 +10,7 @@ public class RingCollision : MonoBehaviour
     Vector3 loc;
     public GameObject startStopLight;
     int numCollidersInContact;
+    public GameObject mistakeLineObj;
 
     // Start is called before the first frame update
     void Start()
@@ -20,7 +21,13 @@ public class RingCollision : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (gameController.GetComponent<HapticsController>().isFeedbackOnNow)
+        {
+            //mistakeLineObj.GetComponent<LineRenderer>().;
+            //Set the start and end points of the line
+            mistakeLineObj.GetComponent<LineRenderer>().SetPosition(0, transform.position);
+            mistakeLineObj.GetComponent<LineRenderer>().SetPosition(1, gameController.GetComponent<HapticsController>().projectedHookPos);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -46,13 +53,39 @@ public class RingCollision : MonoBehaviour
                 other.gameObject.transform.parent.Find("StopCylinder").GetComponent<Collider>().enabled = true;
             }
 
-            
-            gameController.GetComponent<HapticsController>().doControllerReattachOperations(other.gameObject.tag);
-            gameController.GetComponent<HapticsController>().stopMistakeFeedback();
+            if (gameController.GetComponent<HapticsController>().feedbackEnabled && oldCollider!= null)
+            {
+                //if(oldCollider.gameObject.name.Substring()
+                //Find substring of oldcollider game object name after 'Part' and convert it to an integer
+                int oldColliderPartNum = int.Parse(oldCollider.gameObject.name.Substring(4));
+                int currColliderPartNum = int.Parse(other.gameObject.name.Substring(4));
+                //Print oldColliderPartNum and currColliderPartNum
+                Debug.Log("Old collider part number - " + oldColliderPartNum);
+                Debug.Log("Current collider part number - " + currColliderPartNum);
+                if (currColliderPartNum == oldColliderPartNum || currColliderPartNum == oldColliderPartNum + 1 || currColliderPartNum == oldColliderPartNum - 1) //Is it the same part, the next part or the previous part I am moving to?
+                {
+                    //Skip the rest of the code
+                    //return;
+                    gameController.GetComponent<HapticsController>().doControllerReattachOperations(other.gameObject.tag);
+                    gameController.GetComponent<HapticsController>().stopMistakeFeedback();
+                    mistakeLineObj.SetActive(false);
+                }
+                else
+                {
+                    Debug.Log("You jumped!");
+                }
+            }
+            else
+            {
+                /*gameController.GetComponent<HapticsController>().doControllerReattachOperations(other.gameObject.tag);
+                gameController.GetComponent<HapticsController>().stopMistakeFeedback();
+                mistakeLineObj.SetActive(false);*/
+            }
         }
         else if (other.tag == "StopZone")
         {
             gameController.GetComponent<HapticsController>().doControllerReattachOperations("null");
+            mistakeLineObj.SetActive(false);
             gameController.GetComponent<HapticsController>().feedbackEnabled = false;
             //gameController.GetComponent<HapticsController>().startStopRefController.SetActive(true);
             //gameController.GetComponent<HapticsController>().startStopRefController.transform.position = gameController.GetComponent<HapticsController>().stopPositions[gameController.GetComponent<HapticsController>().currLevel - 1];
@@ -62,6 +95,7 @@ public class RingCollision : MonoBehaviour
         else if (other.tag == "StartZone")
         {
             gameController.GetComponent<HapticsController>().doControllerReattachOperations("null");
+            mistakeLineObj.SetActive(false);
             gameController.GetComponent<HapticsController>().feedbackEnabled = false;
             //gameController.GetComponent<HapticsController>().startStopRefController.SetActive(false);            
             gameController.GetComponent<HapticsController>().solidRightHandController.SetActive(true);
@@ -102,6 +136,7 @@ public class RingCollision : MonoBehaviour
         {
             //startStopLight.SetActive(true);
             gameController.GetComponent<HapticsController>().stopMistakeFeedback();
+            mistakeLineObj.SetActive(false);
             //if (gameController.GetComponent<HapticsController>().client != null && !gameController.GetComponent<HapticsController>().tutorialPhase)
             //    gameController.GetComponent<HapticsController>().client.Write("M;1;;;LeftSwitchPressed;Left Switch Pressed\r\n");
         }
@@ -109,6 +144,7 @@ public class RingCollision : MonoBehaviour
         {
             //startStopLight.SetActive(true);
             gameController.GetComponent<HapticsController>().stopMistakeFeedback();
+            mistakeLineObj.SetActive(false);
             //if (gameController.GetComponent<HapticsController>().client != null && !gameController.GetComponent<HapticsController>().tutorialPhase)
             //gameController.GetComponent<HapticsController>().client.Write("M;1;;;RightSwitchPressed;Right Switch Pressed\r\n");
         }
@@ -123,12 +159,14 @@ public class RingCollision : MonoBehaviour
 
             Debug.Log("Exit from " + other.gameObject);
             Debug.Log("Collider tag - " + other.gameObject.tag);
+            oldCollider = other;
             if (numCollidersInContact < 1)
             {
                 Debug.Log("Number of colliders in contact is less than 1. Triggering feedback");
                 //currCollider = null;
                 gameController.GetComponent<HapticsController>().doControllerDetachOperations((CapsuleCollider)other, other.gameObject.tag, loc);
                 gameController.GetComponent<HapticsController>().triggerMistakeFeedback();
+                mistakeLineObj.SetActive(true);
             }
         }
         else if (other.tag == "StartZone")

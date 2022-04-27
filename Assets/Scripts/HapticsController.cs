@@ -39,6 +39,9 @@ public class HapticsController : MonoBehaviour
     Vector3 offsetGhostDistance;
     Vector3 oldGhostPos;
     GameObject detachPivot;
+    public bool isFeedbackOnNow = false;
+
+    public Vector3 projectedHookPos;
 
     //public GameObject testArduinoSerialControllerObj;
     //public SerialController testArduinoSerialController;
@@ -338,9 +341,9 @@ public class HapticsController : MonoBehaviour
                     //Vector3 projectedPos = new Vector3(ghostRightHandController.transform.position.x, solidRightHandController.transform.position.y, solidRightHandController.transform.position.z);
                     //if (projectedPos.x < currCollider.bounds.max.x && projectedPos.x > currCollider.bounds.min.x)
                     //    solidRightHandController.transform.position = projectedPos;
-                    Vector3 projectedPos = detachPivot.transform.position + new Vector3(offsetGhostDistance.x, 0, 0);
-                    if (projectedPos.x < currCollider.bounds.max.x && projectedPos.x > currCollider.bounds.min.x)
-                        detachPivot.transform.position = projectedPos;
+                    projectedHookPos = detachPivot.transform.position + new Vector3(offsetGhostDistance.x, 0, 0);
+                    if (projectedHookPos.x < currCollider.bounds.max.x && projectedHookPos.x > currCollider.bounds.min.x)
+                        detachPivot.transform.position = projectedHookPos;
 
                     //detachPivot.transform.eulerAngles = ghostRightHandController.transform.eulerAngles;// + offsetPivotAng;
 
@@ -348,17 +351,17 @@ public class HapticsController : MonoBehaviour
                 else if (currDragDir == "y-axis")
                 {
                     //solidRightHandController.transform.position = new Vector3(solidRightHandController.transform.position.x, ghostRightHandController.transform.position.y, solidRightHandController.transform.position.z);
-                    Vector3 projectedPos = detachPivot.transform.position + new Vector3(0, offsetGhostDistance.y, 0);
-                    if (projectedPos.y < currCollider.bounds.max.y && projectedPos.y > currCollider.bounds.min.y)
-                        detachPivot.transform.position = projectedPos;
+                    projectedHookPos = detachPivot.transform.position + new Vector3(0, offsetGhostDistance.y, 0);
+                    if (projectedHookPos.y < currCollider.bounds.max.y && projectedHookPos.y > currCollider.bounds.min.y)
+                        detachPivot.transform.position = projectedHookPos;
                     //detachPivot.transform.eulerAngles = ghostRightHandController.transform.eulerAngles;
                 }
                 else if (currDragDir == "z-axis")
                 {
                     //solidRightHandController.transform.position = new Vector3(solidRightHandController.transform.position.x, solidRightHandController.transform.position.y, ghostRightHandController.transform.position.z);
-                    Vector3 projectedPos = detachPivot.transform.position + new Vector3(0, 0, offsetGhostDistance.z);
-                    if (projectedPos.z < currCollider.bounds.max.z && projectedPos.z > currCollider.bounds.min.z)
-                        detachPivot.transform.position = projectedPos;
+                    projectedHookPos = detachPivot.transform.position + new Vector3(0, 0, offsetGhostDistance.z);
+                    if (projectedHookPos.z < currCollider.bounds.max.z && projectedHookPos.z > currCollider.bounds.min.z)
+                        detachPivot.transform.position = projectedHookPos;
                 }
             }
             else
@@ -428,7 +431,7 @@ public class HapticsController : MonoBehaviour
     public void doControllerDetachOperations(CapsuleCollider _collider, string tag, Vector3 _detachPt)
     {
         currCollider = _collider;
-        Debug.Log("isDetached = true, collision with " + tag);
+        //Debug.Log("isDetached = true, collision with " + tag);
         isDetached = true;
         currDragDir = tag; //x-dir, y-dir or z-dir
 
@@ -446,8 +449,8 @@ public class HapticsController : MonoBehaviour
     }
 
     public void doControllerReattachOperations(string tag)
-    {
-        Debug.Log("isDetached = false, collision with " + tag);
+    {        
+        //Debug.Log("isDetached = false, collision with " + tag);
         isDetached = false;
 
         ghostRightHandController.SetActive(false);
@@ -460,8 +463,9 @@ public class HapticsController : MonoBehaviour
 
     public void triggerMistakeFeedback()
     {
+        isFeedbackOnNow = true;
         Debug.Log("triggerMistakeFeedback");
-        GetComponent<VibrationDemoScript>().TurnEffectOn();
+        //GetComponent<VibrationDemoScript>().TurnEffectOn();
         //StartCoroutine(Haptics(1, 1, 0.1f, true, false));
         //beepsound.mute = false;
         //mistakeLight.GetComponent<MeshRenderer>().material = lightOnMat;
@@ -471,8 +475,9 @@ public class HapticsController : MonoBehaviour
 
     public void stopMistakeFeedback()
     {
+        isFeedbackOnNow = false;
         //beepsound.mute = true;
-        GetComponent<VibrationDemoScript>().TurnEffectOff();
+        //GetComponent<VibrationDemoScript>().TurnEffectOff();
 
 
         //mistakeLight.SetActive(false);
