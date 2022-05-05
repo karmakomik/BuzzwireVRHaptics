@@ -43,6 +43,9 @@ public class HapticsController : MonoBehaviour
 
     public Vector3 projectedHookPos;
 
+    public GameObject hapticArduinoSerialObj;
+    public SerialController hapticArduinoSerialController;
+
     //public GameObject testArduinoSerialControllerObj;
     //public SerialController testArduinoSerialController;
 
@@ -460,11 +463,12 @@ public class HapticsController : MonoBehaviour
         solidRightHandController.transform.localPosition = solidRightHandControllerDefaultPos;
 
     }
-
+    
     public void triggerMistakeFeedback()
     {
         isFeedbackOnNow = true;
         Debug.Log("triggerMistakeFeedback");
+        hapticArduinoSerialController.SendSerialMessage("1");
         //GetComponent<VibrationDemoScript>().TurnEffectOn();
         //StartCoroutine(Haptics(1, 1, 0.1f, true, false));
         //beepsound.mute = false;
@@ -473,9 +477,24 @@ public class HapticsController : MonoBehaviour
 
     }
 
+    void OnMessageArrived(string msg)
+    {
+        Debug.Log("Message from Arduino - " + msg);
+    }
+
+    // Invoked when a connect/disconnect event occurs. The parameter 'success'
+    // will be 'true' upon connection, and 'false' upon disconnection or
+    // failure to connect.
+    void OnConnectionEvent(bool success)
+    {
+        Debug.Log("Arduino connected");
+    }    
+
     public void stopMistakeFeedback()
     {
         isFeedbackOnNow = false;
+        hapticArduinoSerialController.SendSerialMessage("0");
+        
         //beepsound.mute = true;
         //GetComponent<VibrationDemoScript>().TurnEffectOff();
 
