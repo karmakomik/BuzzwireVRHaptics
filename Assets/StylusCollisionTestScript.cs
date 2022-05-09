@@ -6,6 +6,7 @@ public class StylusCollisionTestScript : MonoBehaviour
 {
     public HapticPlugin HapticDevice = null;
     public GameObject pilotTestControllerObj;
+    float vibrationDuration = 3f;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,16 +20,22 @@ public class StylusCollisionTestScript : MonoBehaviour
 
     }
 
-    void OnTriggerEnter(Collider other)
-    {        
+    void OnTriggerStay(Collider other)
+    {
+        pilotTestControllerObj.GetComponent<PilotTestControllerScript>().hapticTest_startVibration_custom("a", (int)pilotTestControllerObj.GetComponent<PilotTestControllerScript>().vibrationSlider.value);
+
+        //pilotTestControllerObj.GetComponent<PilotTestControllerScript>().currSurface = other.gameObject;
+
+        /*
         Debug.Log("Velocity of stylus - " + HapticDevice.stylusVelocityRaw.normalized);
         if (other.gameObject.name.StartsWith("Up"))
         {
             if (HapticDevice.stylusVelocityRaw.normalized.y > 0)
             {
+                other.gameObject.SetActive(false);
                 Debug.Log("Collision with " + other.gameObject.name);
-                pilotTestControllerObj.GetComponent<PilotTestControllerScript>().hapticTest_startVibration_mid("b");
-                StartCoroutine(WaitForSeconds(1f, "b"));
+                pilotTestControllerObj.GetComponent<PilotTestControllerScript>().hapticTest_startVibration_mid("c");
+                StartCoroutine(WaitForSeconds(vibrationDuration, "c"));
             }
         }
 
@@ -36,20 +43,62 @@ public class StylusCollisionTestScript : MonoBehaviour
         {
             if (HapticDevice.stylusVelocityRaw.normalized.y < 0)
             {
+                other.gameObject.SetActive(false);                
                 Debug.Log("Collision with " + other.gameObject.name);
-                pilotTestControllerObj.GetComponent<PilotTestControllerScript>().hapticTest_startVibration_mid("c");
-                StartCoroutine(WaitForSeconds(1f, "c"));
+                pilotTestControllerObj.GetComponent<PilotTestControllerScript>().hapticTest_startVibration_mid("a");
+                StartCoroutine(WaitForSeconds(vibrationDuration, "a"));
             }
         }
+
+        if (other.gameObject.name.StartsWith("Left"))
+        {
+            if (HapticDevice.stylusVelocityRaw.normalized.x < 0)
+            {
+                other.gameObject.SetActive(false);
+                Debug.Log("Collision with " + other.gameObject.name);
+                pilotTestControllerObj.GetComponent<PilotTestControllerScript>().hapticTest_startVibration_mid("c");
+                StartCoroutine(WaitForSeconds(vibrationDuration, "c"));
+            }
+        }
+
+        if (other.gameObject.name.StartsWith("Right"))
+        {
+            if (HapticDevice.stylusVelocityRaw.normalized.x > 0)
+            {
+                other.gameObject.SetActive(false);
+                Debug.Log("Collision with " + other.gameObject.name);
+                pilotTestControllerObj.GetComponent<PilotTestControllerScript>().hapticTest_startVibration_mid("d");
+                StartCoroutine(WaitForSeconds(vibrationDuration, "d"));
+            }
+        }
+
+        if (other.gameObject.name.StartsWith("Back"))
+        {
+            if (HapticDevice.stylusVelocityRaw.normalized.z < 0)
+            {
+                other.gameObject.SetActive(false);
+                Debug.Log("Collision with " + other.gameObject.name);
+                pilotTestControllerObj.GetComponent<PilotTestControllerScript>().hapticTest_startVibration_mid("f");
+                StartCoroutine(WaitForSeconds(vibrationDuration, "f"));
+            }
+        }
+
+        if (other.gameObject.name.StartsWith("Front"))
+        {
+            if (HapticDevice.stylusVelocityRaw.normalized.z > 0)
+            {
+                other.gameObject.SetActive(false);
+                Debug.Log("Collision with " + other.gameObject.name);
+                pilotTestControllerObj.GetComponent<PilotTestControllerScript>().hapticTest_startVibration_mid("e");
+                
+            }
+        }
+        */
     }
 
-
-    IEnumerator WaitForSeconds(float seconds, string motor)
+    void OnTriggerExit(Collider other)
     {
-        yield return new WaitForSeconds(seconds);
-
-        //After x seconds, execute the following code
-        pilotTestControllerObj.GetComponent<PilotTestControllerScript>().hapticTest_stopVibration(motor);
+        pilotTestControllerObj.GetComponent<PilotTestControllerScript>().hapticTest_stopVibration("a");
     }
 
 
