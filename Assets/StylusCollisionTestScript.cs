@@ -7,6 +7,7 @@ public class StylusCollisionTestScript : MonoBehaviour
     public HapticPlugin HapticDevice = null;
     public GameObject pilotTestControllerObj;
     float vibrationDuration = 3f;
+    //bool isStylusTouchingSurface = false;
     // Start is called before the first frame update
     void Start()
     {

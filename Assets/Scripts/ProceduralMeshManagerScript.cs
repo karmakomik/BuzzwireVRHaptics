@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor.Formats.Fbx.Exporter;
+//using UnityEditor.Formats.Fbx.Exporter;
 
 public class ProceduralMeshManagerScript : MonoBehaviour
 {
@@ -19,8 +19,8 @@ public class ProceduralMeshManagerScript : MonoBehaviour
 
     public static void ExportGameObjects(Object[] objects)
     {
-        string filePath = System.IO.Path.Combine(Application.dataPath, "buzzwire.fbx");
-        ModelExporter.ExportObjects(filePath, objects);
+        //string filePath = System.IO.Path.Combine(Application.dataPath, "buzzwire.fbx");
+        //ModelExporter.ExportObjects(filePath, objects);
 
         // ModelExporter.ExportObject can be used instead of 
         // ModelExporter.ExportObjects to export a single game object

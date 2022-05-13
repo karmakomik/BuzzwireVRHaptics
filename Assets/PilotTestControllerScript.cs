@@ -5,6 +5,8 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.Mathematics;
+using UnityEngine.SceneManagement;
+
 public class PilotTestControllerScript : MonoBehaviour
 {
     StreamWriter sw1, sw2;
@@ -30,8 +32,12 @@ public class PilotTestControllerScript : MonoBehaviour
     float staticFrictionSliderVal;
     float dynamicFrictionSliderVal;
 
+    public GameObject gotoMenuButton;
+
     public GameObject groundedSurfaceObj;
     public GameObject vibrationSurfaceObj;
+    public GameObject testGroundedSurfaceObj;
+    public GameObject initTestUI;
 
     public TMPro.TextMeshProUGUI vibrationSliderValueText;
     public TMPro.TextMeshProUGUI stiffnessSliderValueText;
@@ -90,18 +96,22 @@ public class PilotTestControllerScript : MonoBehaviour
     string intensity = "000";
     string motor = "a";
 
-    string timeOfSelection, timeVibrationEnd;
+    string timeOfSelection, timeVibrationStart;
 
     // Start is called before the first frame update
     void Start()
     {
-        tutorialControlUI.SetActive(false);
-        pilotTest1ControlUI.SetActive(false);
-        pilotTest2ControlUI.SetActive(true);
+        //initTestUI.SetActive(true);
+        //testGroundedSurfaceObj.SetActive(true);
+        //tutorialControlUI.SetActive(!true);
+        //pilotTest1ControlUI.SetActive(false);
+        //pilotTest2ControlUI.SetActive(!false);
+        //groundedSurfaceObj.SetActive(!false);
+        //vibrationSurfaceObj.SetActive(!false);
         currTrialNum = 0;
         currMotorSeqInd = 0;
         currStiffnessInd = 0;
-        groundedSurfaceObj.GetComponent<HapticSurface>().hlStiffness = stiffnessDict[stiffnessSequences[currTrialNum, currStiffnessInd]];
+        //groundedSurfaceObj.GetComponent<HapticSurface>().hlStiffness = stiffnessDict[stiffnessSequences[currTrialNum, currStiffnessInd]];
 
         if (!Directory.Exists(Application.persistentDataPath + "/PilotTestData"))
         {
@@ -114,6 +124,28 @@ public class PilotTestControllerScript : MonoBehaviour
             HapticDevice = (HapticPlugin)FindObjectOfType(typeof(HapticPlugin));
     }
 
+    public void startTutorial()
+    {
+        initTestUI.SetActive(false);
+        testGroundedSurfaceObj.SetActive(false);
+        tutorialControlUI.SetActive(true);        
+    }
+
+    public void startTest1()
+    {
+        initTestUI.SetActive(false);
+        testGroundedSurfaceObj.SetActive(false);
+        pilotTest1ControlUI.SetActive(true);
+    }
+    public void startTest2()
+    {
+        initTestUI.SetActive(false);
+        testGroundedSurfaceObj.SetActive(false);
+        pilotTest2ControlUI.SetActive(true);
+        groundedSurfaceObj.SetActive(true);
+        vibrationSurfaceObj.SetActive(true);
+    }
+
     public void startVibration()
     {
         print("Starting vibration for motor " + motorSequences[currTrialNum, currMotorSeqInd]);
@@ -124,6 +156,7 @@ public class PilotTestControllerScript : MonoBehaviour
     public void startVibration(string motorName)
     {
         print("Starting vibration for motor " + motorName);
+        timeVibrationStart = System.DateTime.Now.ToString("HH:mm:ss:fff");
         hapticTest_startVibration_mid(motorName);
         StartCoroutine(WaitForSeconds(vibrationDuration, motorName));
     }
@@ -179,7 +212,7 @@ public class PilotTestControllerScript : MonoBehaviour
         yield return new WaitForSeconds(seconds);
 
         //After x seconds, execute the following code
-        timeVibrationEnd = System.DateTime.Now.ToString("HH:mm:ss:fff");
+
         hapticTest_stopVibration(motor);
     }
 
@@ -203,9 +236,9 @@ public class PilotTestControllerScript : MonoBehaviour
         if (sw1 != null)
         {
             var dropDownList = participantChoiceDropDownLists[currMotorSeqInd].GetComponent<TMPro.TMP_Dropdown>();
-            sw1.WriteLine("" + currTrialNum + ',' + motorDictionary[motorSequences[currTrialNum, currMotorSeqInd]] + ',' + dropDownList.options[dropDownList.value].text + ',' + timeVibrationEnd + ',' + timeOfSelection);
+            sw1.WriteLine("" + currTrialNum + ',' + motorDictionary[motorSequences[currTrialNum, currMotorSeqInd]] + ',' + dropDownList.options[dropDownList.value].text + ',' + timeVibrationStart + ',' + timeOfSelection);
             sw1.Flush();
-            print("" + currTrialNum + ',' + motorDictionary[motorSequences[currTrialNum, currMotorSeqInd]] + ',' + dropDownList.options[dropDownList.value].text + ',' + timeVibrationEnd + ',' + timeOfSelection);
+            print("" + currTrialNum + ',' + motorDictionary[motorSequences[currTrialNum, currMotorSeqInd]] + ',' + dropDownList.options[dropDownList.value].text + ',' + timeVibrationStart + ',' + timeOfSelection);
             ++currMotorSeqInd;
         }
 
@@ -263,6 +296,13 @@ public class PilotTestControllerScript : MonoBehaviour
         }
     }
 
+    public void gotoMenu()
+    {
+        //Load scene
+        SceneManager.LoadScene("Buzzwire_Pilot_Menu");
+    }
+
+
     public void gotoNextTrial()
     {
         if (currTrialNum < 4)
@@ -281,10 +321,12 @@ public class PilotTestControllerScript : MonoBehaviour
         else
         {
             pilotTest1ControlUI.SetActive(false);
-            pilotTest2ControlUI.SetActive(true);
-            groundedSurfaceObj.SetActive(true);
-            vibrationSurfaceObj.SetActive(true);
-            currTrialNum = 0;
+
+            //pilotTest2ControlUI.SetActive(true);
+            //groundedSurfaceObj.SetActive(true);
+            //vibrationSurfaceObj.SetActive(true);
+            //currTrialNum = 0;
+            gotoMenuButton.SetActive(true);
             sw1.Close();
             //gotoNextVibrationEqTrial();
         }
