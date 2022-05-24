@@ -5,6 +5,7 @@ using UnityEngine;
 public class FormUIScript : MonoBehaviour
 {
     // Start is called before the first frame update
+    public int xMin = -1740, xMax = 1808;
 
     public List<GameObject> arrows;
 
@@ -25,5 +26,13 @@ public class FormUIScript : MonoBehaviour
         foreach (GameObject obj in arrows)
             obj.SetActive(false);
         arrows[index].SetActive(true);
+    }
+
+    public void moveCrossToX(int x)
+    {
+        // Move cross to x
+        Vector3 pos = arrows[0].transform.localPosition;
+        pos.x = x;
+        arrows[0].transform.localPosition = pos;
     }
 }
