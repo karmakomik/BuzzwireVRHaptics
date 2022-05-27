@@ -21,8 +21,8 @@ public class FormHandlerScript : MonoBehaviour
 
     GameObject touchedObj;
 
-    List<Action> surveyMethods1Medium, surveyMethods2;
-    public int methodCounter1, methodCounter2;
+    List<Action> surveyMethodsMediumPre, surveyMethodsMediumPost, surveyMethodsHiLoPre, surveyMethodsHiLoPost;
+    public int methodCounterMediumPre, methodCounterMediumPost, methodCounterHiLoPre, methodCounterHiLoPost;
 
     public Material buttonActiveMat;
     public Material buttonInactiveMat;
@@ -49,30 +49,52 @@ public class FormHandlerScript : MonoBehaviour
     {
         currLikertMode = LikertMode.NONE;
 
-        methodCounter1 = methodCounter2 = 0;
+        methodCounterMediumPre = methodCounterMediumPost = 0;
 
-        surveyMethods1Medium = new List<Action>();
-        surveyMethods1Medium.Add(gotoIntro);
-        surveyMethods1Medium.Add(gotoSelfEfficacy1);
-        surveyMethods1Medium.Add(gotoAge);
-        surveyMethods1Medium.Add(gotoGender);
-        surveyMethods1Medium.Add(gotoVRExp);
+        surveyMethodsMediumPre = new List<Action>();
+        surveyMethodsMediumPre.Add(gotoIntro);
+        surveyMethodsMediumPre.Add(gotoSelfEfficacy1);
+        surveyMethodsMediumPre.Add(gotoAge);
+        surveyMethodsMediumPre.Add(gotoGender);
+        surveyMethodsMediumPre.Add(gotoVRExp);
+        surveyMethodsMediumPre.Add(surveyOver);
 
-        surveyMethods2 = new List<Action>();
-        surveyMethods2.Add(gotoSAM);
-        surveyMethods2.Add(gotoSelfEfficacy2);
-        surveyMethods2.Add(gotoPresence1);
-        surveyMethods2.Add(gotoPresence2);
-        surveyMethods2.Add(gotoPresence3);
-        surveyMethods2.Add(gotoPresence4);
-        surveyMethods2.Add(gotoPresence5);
-        surveyMethods2.Add(gotoNASATLX_Mental);
-        surveyMethods2.Add(gotoNASATLX_Physical);
-        surveyMethods2.Add(gotoNASATLX_Temporal);
-        surveyMethods2.Add(gotoNASATLX_Performance);
-        surveyMethods2.Add(gotoNASATLX_Effort);
-        surveyMethods2.Add(gotoNASATLX_Frustration);
-        surveyMethods2.Add(surveyOver);
+        surveyMethodsMediumPost = new List<Action>();
+        surveyMethodsMediumPost.Add(gotoSAM);
+        surveyMethodsMediumPost.Add(gotoSelfEfficacy2);
+        surveyMethodsMediumPost.Add(gotoPresence1);
+        surveyMethodsMediumPost.Add(gotoPresence2);
+        surveyMethodsMediumPost.Add(gotoPresence3);
+        surveyMethodsMediumPost.Add(gotoPresence4);
+        surveyMethodsMediumPost.Add(gotoPresence5);
+        surveyMethodsMediumPost.Add(gotoNASATLX_Mental);
+        surveyMethodsMediumPost.Add(gotoNASATLX_Physical);
+        surveyMethodsMediumPost.Add(gotoNASATLX_Temporal);
+        surveyMethodsMediumPost.Add(gotoNASATLX_Performance);
+        surveyMethodsMediumPost.Add(gotoNASATLX_Effort);
+        surveyMethodsMediumPost.Add(gotoNASATLX_Frustration);
+        surveyMethodsMediumPost.Add(surveyOver);
+
+        surveyMethodsHiLoPre = new List<Action>(); 
+        surveyMethodsHiLoPre.Add(gotoSelfEfficacy1);
+        surveyMethodsHiLoPre.Add(surveyOver);
+
+        surveyMethodsHiLoPost = new List<Action>();
+        surveyMethodsHiLoPost.Add(gotoSAM);
+        surveyMethodsHiLoPost.Add(gotoSelfEfficacy2);
+        surveyMethodsHiLoPost.Add(gotoPresence1);
+        surveyMethodsHiLoPost.Add(gotoPresence2);
+        surveyMethodsHiLoPost.Add(gotoPresence3);
+        surveyMethodsHiLoPost.Add(gotoPresence4);
+        surveyMethodsHiLoPost.Add(gotoPresence5);        
+        surveyMethodsHiLoPost.Add(gotoNASATLX_Mental);
+        surveyMethodsHiLoPost.Add(gotoNASATLX_Physical);
+        surveyMethodsHiLoPost.Add(gotoNASATLX_Temporal);
+        surveyMethodsHiLoPost.Add(gotoNASATLX_Performance);
+        surveyMethodsHiLoPost.Add(gotoNASATLX_Effort);
+        surveyMethodsHiLoPost.Add(gotoNASATLX_Frustration);
+        surveyMethodsHiLoPost.Add(surveyOver);
+
 
         //Remove this
         //changeLikertScale(LikertMode.LIKERT_5);
@@ -163,7 +185,7 @@ public class FormHandlerScript : MonoBehaviour
 
     void resetAllScales()
     {
-        methodCounter1 = methodCounter2 = -1;
+        print("Resetting all likert scales");
         okButtonObj.GetComponent<Renderer>().material = buttonInactiveMat;
         resetLikertButtons();
         hapticDeviceArrow.resetSlider();
@@ -171,81 +193,167 @@ public class FormHandlerScript : MonoBehaviour
 
     void resetLikertButtons()
     {
-        buttonList = likert5Buttons;
-        foreach (GameObject button in buttonList)
+        if (likert5Buttons != null)
         {
-            button.GetComponent<Renderer>().material = buttonInactiveMat;
+            buttonList = likert5Buttons;
+            foreach (GameObject button in buttonList)
+            {
+                button.GetComponent<Renderer>().material = buttonInactiveMat;
+            }
         }
 
-        buttonList = likert7Buttons;
-        foreach (GameObject button in buttonList)
+        if (likert7Buttons != null)
         {
-            button.GetComponent<Renderer>().material = buttonInactiveMat;
+            buttonList = likert7Buttons;
+            foreach (GameObject button in buttonList)
+            {
+                button.GetComponent<Renderer>().material = buttonInactiveMat;
+            }
         }
 
-        buttonList = likert4Buttons;
-        foreach (GameObject button in buttonList)
+        if (likert4Buttons != null)
         {
-            button.GetComponent<Renderer>().material = buttonInactiveMat;
+            buttonList = likert4Buttons;
+            foreach (GameObject button in buttonList)
+            {
+                button.GetComponent<Renderer>().material = buttonInactiveMat;
+            }
         }
     }
 
-    public void gotoPreviousQ_1()
+    public void gotoPreviousMediumPreQ()
     {
-        if (methodCounter1 >= 1)
+        if (methodCounterMediumPre >= 1)
         {
-            methodCounter1--;
+            methodCounterMediumPre--;
             //touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
-            surveyMethods1Medium[methodCounter1]();
+            surveyMethodsMediumPre[methodCounterMediumPre]();
         }
         else
             print("No previous question");
     }
 
-    public void gotoNextQ_1()
+    public void gotoNextMediumPreQ()
     {
-        if (methodCounter1 < surveyMethods1Medium.Count - 1)
+        if (methodCounterMediumPre < surveyMethodsMediumPre.Count - 1)
         {
-            methodCounter1++;
+            methodCounterMediumPre++;
             //touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
             //prevButtonObj.SetActive(false);
             //nextButtonObj.SetActive(false);
-            surveyMethods1Medium[methodCounter1]();
+            surveyMethodsMediumPre[methodCounterMediumPre]();
         }
         else
             print("No next question");
     }
 
-    public void gotoPreviousQ_2()
+    public void gotoPreviousMediumPostQ()
     {
-        if (methodCounter2 >= 1)
+        if (methodCounterMediumPost >= 1)
         {
-            methodCounter2--;
+            methodCounterMediumPost--;
             //touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
-            surveyMethods2[methodCounter2]();
+            surveyMethodsMediumPost[methodCounterMediumPost]();
         }
         else
             print("No previous question");
     }
 
-    public void gotoNextQ_2()
+    public void gotoNextMediumPostQ()
     {
-        if (methodCounter2 < surveyMethods2.Count - 1)
+        if (methodCounterMediumPost < surveyMethodsMediumPost.Count - 1)
         {
-            methodCounter2++;
+            methodCounterMediumPost++;
             //touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
             //prevButtonObj.SetActive(false);
             //nextButtonObj.SetActive(false);
-            surveyMethods2[methodCounter2]();
+            surveyMethodsMediumPost[methodCounterMediumPost]();
         }
         else
             print("No next question");
     }
 
-    public void startSurveyPart1()
+    public void gotoPreviousHiLoPreQ()
     {
-        gotoIntro();
+        print("methodCounterHiLoPre" + methodCounterHiLoPre);
+        if (methodCounterHiLoPre >= 1)
+        {
+            methodCounterHiLoPre--;
+            //touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
+            surveyMethodsHiLoPre[methodCounterHiLoPre]();
+        }
+        else
+            print("No previous question");
     }
+
+    public void gotoNextHiLoPreQ()
+    {
+        if (methodCounterHiLoPre < surveyMethodsHiLoPre.Count - 1)
+        {
+            methodCounterHiLoPre++;
+            //touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
+            //prevButtonObj.SetActive(false);
+            //nextButtonObj.SetActive(false);
+            surveyMethodsHiLoPre[methodCounterHiLoPre]();
+        }
+        else
+            print("No next question");
+    }
+
+    public void gotoPreviousHiLoPostQ()
+    {
+        if (methodCounterHiLoPost >= 1)
+        {
+            methodCounterHiLoPost--;
+            //touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
+            surveyMethodsHiLoPost[methodCounterHiLoPost]();
+        }
+        else
+            print("No previous question");
+    }
+
+    public void gotoNextHiLoPostQ()
+    {
+        if (methodCounterHiLoPost < surveyMethodsHiLoPost.Count - 1)
+        {
+            methodCounterHiLoPost++;
+            //touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
+            //prevButtonObj.SetActive(false);
+            //nextButtonObj.SetActive(false);
+            surveyMethodsHiLoPost[methodCounterHiLoPost]();
+        }
+        else
+            print("No next question");
+    }
+
+    public void startSurveyHiLoPre()
+    {
+        okButtonObj.SetActive(true);
+        methodCounterHiLoPre = -1;
+        gotoNextHiLoPreQ();
+    }
+
+    public void startSurveyHiLoPost()
+    {
+        okButtonObj.SetActive(true);
+        methodCounterHiLoPost = -1;
+        gotoNextHiLoPostQ();
+    }
+
+    public void startSurveyMediumPre()
+    {
+        okButtonObj.SetActive(true);
+        methodCounterMediumPre = -1;
+        gotoNextMediumPreQ();
+    }
+
+    public void startSurveyMediumPost()
+    {
+        okButtonObj.SetActive(true);
+        methodCounterMediumPost = -1;   
+        gotoNextMediumPostQ();    
+    }
+
 
     public void gotoIntro()
     {
@@ -307,11 +415,7 @@ public class FormHandlerScript : MonoBehaviour
         resetLikertButtons();
     }
 
-    public void startSurveyPart2()
-    {
-        gotoSAM();
-    }
-    
+   
     public void gotoSAM()
     {
         vrExpObj.SetActive(false);
@@ -319,6 +423,7 @@ public class FormHandlerScript : MonoBehaviour
         currentFormUI = samScaleObj;
         likert5Obj.SetActive(true);
         likert7Obj.SetActive(false);
+        likert4Obj.SetActive(false);
         selfefficacy2Obj.SetActive(false);
         okButtonObj.GetComponent<Renderer>().material = buttonInactiveMat;
         resetLikertButtons();
@@ -450,9 +555,16 @@ public class FormHandlerScript : MonoBehaviour
 
     public void surveyOver()
     {
+        selfefficacy1Obj.SetActive(false);
+        vrExpObj.SetActive(false);
         NASATLXFrustrationObj.SetActive(false);
-        currentFormUI = null;
+        //currentFormUI = null;
+        likert4Obj.SetActive(false);
+        likert5Obj.SetActive(false);
+        likert7Obj.SetActive(false);
+        
         slider3DRootObj.SetActive(false);
+        okButtonObj.GetComponent<Renderer>().material = buttonInactiveMat;
         okButtonObj.SetActive(false);
         resetAllScales();
         //Send results to imotions

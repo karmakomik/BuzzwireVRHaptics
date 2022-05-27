@@ -10,18 +10,16 @@ public enum ExperimentState
     INIT,
     BASELINE,
     PRE_TEST,
-    PRE_TRAINING_SURVEY_1,
+    MEDIUM_PRE_SURVEY,
     VR_TUTORIAL,
-    UI_TUTORIAL,
     TRAINING_1_MEDIUM_FEEDBACK,
-    POST_TRAINING_SURVEY_1,
+    MEDIUM_POST_SURVEY,
     POST_TEST_1,
-    PRE_TRAINING_SURVEY_2,
+    HILO_PRE_SURVEY,
     TRAINING_2_HIGH_FEEDBACK,
     TRAINING_2_LOW_FEEDBACK,
-    POST_TRAINING_SURVEY_2,
-    POST_TEST_2,
-    SURVEY_2
+    HILO_POST_SURVEY,
+    POST_TEST_2
 };
 
 public class HapticsExperimentControllerScript : MonoBehaviour
@@ -220,8 +218,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
                 goSound.Play();                    
                 modeTxt.text = "Pre Test Active";                    
                 if (client != null)
-                    client.Write("M;1;;;pre_test_started;Test (pre) started\r\n");
-                
+                    client.Write("M;1;;;pre_test_started;\r\n");                
                 break;
             case "VR_TUTORIAL":
                 env.SetActive(true);
@@ -230,52 +227,63 @@ public class HapticsExperimentControllerScript : MonoBehaviour
                 hookRoot.SetActive(true);
                 cylinderPointer.SetActive(false);
                 expState = ExperimentState.VR_TUTORIAL;
+                modeTxt.text = "Tutorial";
                 setAllLevelsInactive();
                 tutorial.SetActive(true);
-                break;
-            case "UI_TUTORIAL":
-                hookRoot.SetActive(false);
-                cylinderPointer.SetActive(true);
-                expState = ExperimentState.UI_TUTORIAL;
                 break;
             case "TRAINING_1_MEDIUM_FEEDBACK":
                 env.SetActive(true);
                 hookRoot.SetActive(true);
                 cylinderPointer.SetActive(false);
                 expState = ExperimentState.TRAINING_1_MEDIUM_FEEDBACK;
-                lishengDeviceController.vibration_level = 63;
+                modeTxt.text = "Training Medium Feedback";
+                lishengDeviceController.vibration_level = 60;
+                if (client != null)
+                    client.Write("M;1;;;medium_training_started;\r\n");
                 break;
-            case "PRE_TRAINING_SURVEY_1":
+            case "MEDIUM_PRE_SURVEY":
                 env.SetActive(false);
                 hookRoot.SetActive(false);
                 cylinderPointer.SetActive(true);
                 surveyPanel.SetActive(true);
-                formHandler.startSurveyPart1();
-                expState = ExperimentState.PRE_TRAINING_SURVEY_1;
+                formHandler.startSurveyMediumPre();
+                modeTxt.text = "Pre Survey";
+                expState = ExperimentState.MEDIUM_PRE_SURVEY;
+                if (client != null)
+                    client.Write("M;1;;;medium_pre_survey_started;\r\n");
                 break;
-            case "POST_TRAINING_SURVEY_1":
+            case "MEDIUM_POST_SURVEY":
                 env.SetActive(false);
                 hookRoot.SetActive(false);
                 cylinderPointer.SetActive(true);
                 surveyPanel.SetActive(true);
-                formHandler.startSurveyPart2();
-                expState = ExperimentState.PRE_TRAINING_SURVEY_1;
+                formHandler.startSurveyMediumPost();
+                modeTxt.text = "Post Survey";
+                expState = ExperimentState.MEDIUM_POST_SURVEY;
+                if (client != null)
+                    client.Write("M;1;;;medium_post_survey_started;\r\n");
                 break;
-            case "PRE_TRAINING_SURVEY_2":
+            case "HILO_PRE_SURVEY":
                 env.SetActive(false);
                 hookRoot.SetActive(false);
                 cylinderPointer.SetActive(true);
                 surveyPanel.SetActive(true);
-                formHandler.startSurveyPart1();
-                expState = ExperimentState.PRE_TRAINING_SURVEY_1;
+                formHandler.startSurveyHiLoPre();
+                modeTxt.text = "Pre Survey";
+                expState = ExperimentState.HILO_PRE_SURVEY;
+                if (client != null)
+                    client.Write("M;1;;;hilo_pre_survey_started;\r\n");
                 break;
-            case "POST_TRAINING_SURVEY_2":
+            case "HILO_POST_SURVEY":
                 env.SetActive(false);
                 hookRoot.SetActive(false);
                 cylinderPointer.SetActive(true);
                 surveyPanel.SetActive(true);
-                formHandler.startSurveyPart2();
-                expState = ExperimentState.PRE_TRAINING_SURVEY_1;
+                formHandler.startSurveyHiLoPost();
+                modeTxt.text = "Post Survey";
+                expState = ExperimentState.HILO_POST_SURVEY;
+                if (client != null)
+                    client.Write("M;1;;;hilo_post_survey_started;\r\n");
                 break;
             case "POST_TEST_1":
                 surveyPanel.SetActive(false);
@@ -289,13 +297,19 @@ public class HapticsExperimentControllerScript : MonoBehaviour
                 hookRoot.SetActive(true);
                 cylinderPointer.SetActive(false);
                 lishengDeviceController.vibration_level = 127;
+                modeTxt.text = "Training High Feedback";
                 expState = ExperimentState.TRAINING_2_HIGH_FEEDBACK;
+                if (client != null)
+                    client.Write("M;1;;;training_high_started;\r\n");
                 break;
             case "TRAINING_2_LOW_FEEDBACK":
                 hookRoot.SetActive(true);
                 cylinderPointer.SetActive(false);
                 expState = ExperimentState.TRAINING_2_LOW_FEEDBACK;
+                modeTxt.text = "Training Low Feedback";
                 lishengDeviceController.vibration_level = 20;
+                if (client != null)
+                    client.Write("M;1;;;training_low_started;\r\n");
                 break;
             case "POST_TEST_2":
                 surveyPanel.SetActive(false);
@@ -304,13 +318,6 @@ public class HapticsExperimentControllerScript : MonoBehaviour
                 if (client != null)
                     client.Write("M;1;;;post_test_2_started;\r\n");
                 break;
-            case "SURVEY_2":
-                env.SetActive(false);
-                hookRoot.SetActive(false);
-                cylinderPointer.SetActive(true);
-                surveyPanel.SetActive(true);
-                expState = ExperimentState.SURVEY_2;
-                break;
             default:
                 break;
         }
@@ -318,6 +325,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
 
     public void changeFeedbackLevel(string level)
     {
+        /*
         switch (level)
         {
             case "HIGH":
@@ -331,7 +339,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
                 break;
             default:
                 break;
-        }
+        }*/
 
     }
 
