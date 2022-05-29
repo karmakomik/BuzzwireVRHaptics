@@ -50,6 +50,8 @@ public class GameControllerScript : MonoBehaviour
         hapticEffectToggled = !hapticEffectToggled;
     }
 
+
+
     // Update is called once per frame
     void Update()
     {

@@ -250,6 +250,7 @@ public class HapticPlugin : MonoBehaviour  {
 
 		double[] zero = {0.0,0.0,0.0};
 		setSpringStiffness(configName, 0.0, 0.0);
+		Debug.Log("configName" + configName);
 		setForce(configName, zero, zero);
 		shape_removeAll();
 		effects_resetAll();

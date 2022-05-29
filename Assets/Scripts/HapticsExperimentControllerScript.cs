@@ -717,6 +717,9 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     {
         isFeedbackOnNow = true;
         vibrateInDirection(_mistakeDir);
+        //double[] zero = { 0.0, 0.0, 0.0 };
+        //double[] force = { 0.1 * _mistakeDir.x, 0.1 * _mistakeDir.y, 0.1 * _mistakeDir.z };
+        //HapticPlugin.setForce("Default Device", force, zero);
         Debug.Log("triggerMistakeFeedback");
         
         //hapticArduinoSerialController.SendSerialMessage("1");
@@ -745,11 +748,13 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     {
         isFeedbackOnNow = false;
         vibrateInDirection(new Vector3(0, 0, 0));
+        //double[] zero = { 0.0, 0.0, 0.0 };
+        //HapticPlugin.setForce("Default Device", zero, zero);
         //hapticArduinoSerialController.SendSerialMessage("0");
 
         //beepsound.mute = true;
         //GetComponent<VibrationDemoScript>().TurnEffectOff();
-
+        
 
         //mistakeLight.SetActive(false);
     }

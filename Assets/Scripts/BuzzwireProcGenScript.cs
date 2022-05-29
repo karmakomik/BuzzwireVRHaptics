@@ -49,7 +49,7 @@ public class BuzzwireProcGenScript : MonoBehaviour
 		{
 			Vector3 centerLoc = new Vector3((i * interSliceDistance), 0.0f, 0.0f);
 			//rebarSkeleton.Add(centerLoc);
-			cylinderSlices.Add(new CylinderSlice(centerLoc, rebarRadius, sliceSideCount, i, numSlices, CylinderFaceType.side, 45));
+			cylinderSlices.Add(new CylinderSlice(centerLoc, rebarRadius, sliceSideCount, i, numSlices, CylinderFaceType.side, 0));
 			cylinderVerticesList.AddRange(cylinderSlices[i].verts);
 			cylinderNormalsList.AddRange(cylinderSlices[i].normals);
 			cylinderUVList.AddRange(cylinderSlices[i].uvs);
