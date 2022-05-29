@@ -173,7 +173,8 @@ public class RingCollision : MonoBehaviour
                 //experimentControllerScript.changeIntensityOfGhost(math.remap(0, 127, 0, 1, mistakeVector.magnitude));
 
                 mistakeDirection = mistakeVector.normalized;
-                experimentControllerScript.triggerMistakeFeedback(mistakeDirection);
+                float mistakeDepth = mistakeVector.magnitude;
+                experimentControllerScript.triggerMistakeFeedback(mistakeDirection, mistakeDepth);
                 mistakeLineObj.SetActive(true);
             }
         }

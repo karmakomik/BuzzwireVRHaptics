@@ -713,13 +713,15 @@ public class HapticsExperimentControllerScript : MonoBehaviour
         lishengDeviceController.vibrateInDirection(direction);
     }
     
-    public void triggerMistakeFeedback(Vector3 _mistakeDir)
+    public void triggerMistakeFeedback(Vector3 _mistakeDir, float _depth)
     {
         isFeedbackOnNow = true;
         vibrateInDirection(_mistakeDir);
+        print("Depth" + _depth);
         //double[] zero = { 0.0, 0.0, 0.0 };
         //double[] force = { 0.1 * _mistakeDir.x, 0.1 * _mistakeDir.y, 0.1 * _mistakeDir.z };
         //HapticPlugin.setForce("Default Device", force, zero);
+        HapticsDeviceManager.SetForce(20.0f * _depth * new Vector3(0, _mistakeDir.y, _mistakeDir.z));
         Debug.Log("triggerMistakeFeedback");
         
         //hapticArduinoSerialController.SendSerialMessage("1");
@@ -748,13 +750,14 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     {
         isFeedbackOnNow = false;
         vibrateInDirection(new Vector3(0, 0, 0));
+        HapticsDeviceManager.SetForce(new Vector3(0,0,0));
         //double[] zero = { 0.0, 0.0, 0.0 };
         //HapticPlugin.setForce("Default Device", zero, zero);
         //hapticArduinoSerialController.SendSerialMessage("0");
 
         //beepsound.mute = true;
         //GetComponent<VibrationDemoScript>().TurnEffectOff();
-        
+
 
         //mistakeLight.SetActive(false);
     }

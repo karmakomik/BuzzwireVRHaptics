@@ -57,18 +57,18 @@ public class JunctionColliderScript : MonoBehaviour
     {
         if (surface == surface2)
         {
-            surface1.GetComponent<HapticSurface>().hlStiffness = 0.002f;
-            surface1.GetComponent<HapticSurface>().hlPopThrough = 0.001f;
-            surface2.GetComponent<HapticSurface>().hlStiffness = 0.7f;
-            surface2.GetComponent<HapticSurface>().hlPopThrough = 0;
+            //surface1.GetComponent<HapticSurface>().hlStiffness = 0.002f;
+            //surface1.GetComponent<HapticSurface>().hlPopThrough = 0.001f;
+            //surface2.GetComponent<HapticSurface>().hlStiffness = 0.7f;
+            //surface2.GetComponent<HapticSurface>().hlPopThrough = 0;
         }
         else if(surface == surface1)
         {
-            surface1.GetComponent<HapticSurface>().hlStiffness = 0.7f;
-            surface1.GetComponent<HapticSurface>().hlPopThrough = 0;
-            surface2.GetComponent<HapticSurface>().hlStiffness = 0.002f;
-            surface2.GetComponent<HapticSurface>().hlPopThrough = 0.001f;
-        }        
+            //surface1.GetComponent<HapticSurface>().hlStiffness = 0.7f;
+            //surface1.GetComponent<HapticSurface>().hlPopThrough = 0;
+            //surface2.GetComponent<HapticSurface>().hlStiffness = 0.002f;
+            //surface2.GetComponent<HapticSurface>().hlPopThrough = 0.001f;
+        }
     }
 
 }

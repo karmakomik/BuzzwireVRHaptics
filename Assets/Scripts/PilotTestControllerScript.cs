@@ -11,7 +11,7 @@ public class PilotTestControllerScript : MonoBehaviour
 {
     StreamWriter sw1, sw2;
 
-    public HapticPlugin HapticDevice = null;
+    //public HapticPlugin HapticDevice = null;
 
     public float vibrationDuration = 3f;
 
@@ -120,8 +120,8 @@ public class PilotTestControllerScript : MonoBehaviour
         sw1 = new StreamWriter(Application.persistentDataPath + "/PilotTestData/HapticsPilotTestData_UserChoices_" + System.DateTime.Now.ToString("dd_MMMM_yyyy_HH_mm_ss") + ".csv");
         sw2 = new StreamWriter(Application.persistentDataPath + "/PilotTestData/HapticsPilotTestData_HapticParams_" + System.DateTime.Now.ToString("dd_MMMM_yyyy_HH_mm_ss") + ".csv");
 
-        if (HapticDevice == null)
-            HapticDevice = (HapticPlugin)FindObjectOfType(typeof(HapticPlugin));
+        //if (HapticDevice == null)
+        //HapticDevice = (HapticPlugin)FindObjectOfType(typeof(HapticPlugin));
     }
 
     public void startTutorial()
@@ -171,28 +171,28 @@ public class PilotTestControllerScript : MonoBehaviour
     {
         stiffnessSliderValueText.text = "" + val;
         stiffnessSliderVal = math.remap(0, 127, 0, 1, val);
-        groundedSurfaceObj.GetComponent<HapticSurface>().hlStiffness = stiffnessSliderVal;
+        // groundedSurfaceObj.GetComponent<HapticSurface>().hlStiffness = stiffnessSliderVal;
         //HapticDevice.PhysicsForceDamping = math.remap(0, 127, 0, 1, val);
     }
     public void onDampingValChange(float val)
     {
         dampingSliderValueText.text = "" + val;
         dampingSliderVal = math.remap(0, 127, 0, 1, val);
-        groundedSurfaceObj.GetComponent<HapticSurface>().hlDamping = dampingSliderVal;
+        //groundedSurfaceObj.GetComponent<HapticSurface>().hlDamping = dampingSliderVal;
         //HapticDevice.PhysicsForceStrength = math.remap(0, 127, 0, 1, val);
     }
     public void onStaticFrictionValChange(float val)
     {
         staticFrictionSliderValueText.text = "" + val;
         staticFrictionSliderVal = math.remap(0, 127, 0, 1, val);
-        groundedSurfaceObj.GetComponent<HapticSurface>().hlStaticFriction = staticFrictionSliderVal;
+        //groundedSurfaceObj.GetComponent<HapticSurface>().hlStaticFriction = staticFrictionSliderVal;
         //HapticDevice.PhysicsForceStrength = math.remap(0, 127, 0, 1, val);
     }
     public void onDynamicFrictionChange(float val)
     {
         dynamicFrictionSliderValueText.text = "" + val;
         dynamicFrictionSliderVal = math.remap(0, 127, 0, 1, val);
-        groundedSurfaceObj.GetComponent<HapticSurface>().hlDynamicFriction = dynamicFrictionSliderVal;
+        //groundedSurfaceObj.GetComponent<HapticSurface>().hlDynamicFriction = dynamicFrictionSliderVal;
         //HapticDevice.PhysicsForceStrength = math.remap(0, 127, 0, 1, val);
     }
 
@@ -376,7 +376,7 @@ public class PilotTestControllerScript : MonoBehaviour
         currStiffnessLevelUIText.GetComponent<TMPro.TextMeshProUGUI>().text = stiffnessSequences[currTrialNum, currStiffnessInd];
         currVibrationTrialNumUIText.GetComponent<TMPro.TextMeshProUGUI>().text = "Trial No." + (currTrialNum + 1);
         prevSeq = stiffnessSequences[currTrialNum, currStiffnessInd];
-        groundedSurfaceObj.GetComponent<HapticSurface>().hlStiffness = stiffnessDict[stiffnessSequences[currTrialNum, currStiffnessInd]];     
-    }        
+        //groundedSurfaceObj.GetComponent<HapticSurface>().hlStiffness = stiffnessDict[stiffnessSequences[currTrialNum, currStiffnessInd]];     
+    }
 
 }

@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class StylusCollisionTestScript : MonoBehaviour
 {
-    public HapticPlugin HapticDevice = null;
+    //public HapticPlugin HapticDevice = null;
     public GameObject pilotTestControllerObj;
     float vibrationDuration = 3f;
     //bool isStylusTouchingSurface = false;
     // Start is called before the first frame update
     void Start()
     {
-        if (HapticDevice == null)
-            HapticDevice = (HapticPlugin)FindObjectOfType(typeof(HapticPlugin));
+        // if (HapticDevice == null)
+        //     HapticDevice = (HapticPlugin)FindObjectOfType(typeof(HapticPlugin));
     }
 
     // Update is called once per frame
