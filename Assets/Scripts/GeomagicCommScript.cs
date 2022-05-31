@@ -30,7 +30,7 @@ public class GeomagicCommScript : MonoBehaviour
             proxy.transform.position = proxyPos;
 
             Vector4 proxyRot = HapticsDeviceManager.GetProxyRotation();
-            print(proxyRot);
+            //print(proxyRot);
             proxy.transform.rotation = Quaternion.AngleAxis(Mathf.Rad2Deg * proxyRot[3], new Vector3(-proxyRot[1], -proxyRot[2], proxyRot[0]));
 
         }
@@ -49,7 +49,7 @@ public class GeomagicCommScript : MonoBehaviour
     //On application quit
     void OnApplicationQuit()
     {
-        print("closeDLL " + HapticsDeviceManager.stopHaptics());
+        print("Stopping haptics " + HapticsDeviceManager.stopHaptics());
     }
 
 }

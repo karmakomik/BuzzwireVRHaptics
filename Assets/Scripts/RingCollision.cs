@@ -15,11 +15,13 @@ public class RingCollision : MonoBehaviour
     public GameObject mistakeLineObj;
     private Vector3 mistakeVector;
     Vector3 mistakeDirection;
-    
+    int levelStartTime;
+
 
     // Start is called before the first frame update
     void Start()
     {
+        levelStartTime = 0;
         numCollidersInContact = 0;
         experimentControllerScript = experimentController.GetComponent<HapticsExperimentControllerScript>();
     }
@@ -52,28 +54,11 @@ public class RingCollision : MonoBehaviour
         if (other.tag != "StartZone" && other.tag != "StopZone" && experimentControllerScript.feedbackEnabled)
         {
 
-            if (experimentControllerScript.feedbackEnabled && oldCollider!= null)
+            if (experimentControllerScript.feedbackEnabled)
             {
-                //if(oldCollider.gameObject.name.Substring()
-                //Find substring of oldcollider game object name after 'Part' and convert it to an integer
-                int oldColliderPartNum = int.Parse(oldCollider.gameObject.name.Substring(4));
-                int currColliderPartNum = int.Parse(other.gameObject.name.Substring(4));
-                //Print oldColliderPartNum and currColliderPartNum
-                Debug.Log("Old collider part number - " + oldColliderPartNum);
-                Debug.Log("Current collider part number - " + currColliderPartNum);
-                //if (currColliderPartNum == oldColliderPartNum || currColliderPartNum == oldColliderPartNum + 1 || currColliderPartNum == oldColliderPartNum - 1) //Is it the same part, the next part or the previous part I am moving to?
-                {
-                    //Skip the rest of the code
-                    //return;
-                    experimentControllerScript.doControllerReattachOperations(other.gameObject.tag);
-                    experimentControllerScript.stopMistakeFeedback();
-                    
-                    mistakeLineObj.SetActive(false);
-                }
-                /*else
-                //{
-                    Debug.Log("You jumped!");
-                }*/
+                experimentControllerScript.doControllerReattachOperations(other.gameObject.tag);
+                experimentControllerScript.stopMistakeFeedback();
+                mistakeLineObj.SetActive(false);
             }
             else
             {
@@ -140,7 +125,7 @@ public class RingCollision : MonoBehaviour
             experimentControllerScript.stopMistakeFeedback();
             mistakeLineObj.SetActive(false);
             if (experimentControllerScript.client != null && experimentControllerScript.expState != ExperimentState.VR_TUTORIAL)
-                experimentControllerScript.client.Write("M;1;;;LeftSwitchPressed;Left Switch Pressed\r\n");
+                experimentControllerScript.client.Write("M;1;;;LeftSwitchPressedVR;\r\n");
         }
         else if (other.tag == "StopZone")
         {
@@ -148,7 +133,7 @@ public class RingCollision : MonoBehaviour
             experimentControllerScript.stopMistakeFeedback();
             mistakeLineObj.SetActive(false);
             if (experimentControllerScript.client != null && experimentControllerScript.expState != ExperimentState.VR_TUTORIAL)
-                experimentControllerScript.client.Write("M;1;;;RightSwitchPressed;Right Switch Pressed\r\n");
+                experimentControllerScript.client.Write("M;1;;;RightSwitchPressedVR;\r\n");
         }
     }
 
@@ -160,7 +145,7 @@ public class RingCollision : MonoBehaviour
             //startStopLight.SetActive(false);
 
             //Debug.Log("Exit from " + other.gameObject);
-            //Debug.Log("Collider tag - " + other.gameObject.tag);
+            Debug.Log("Collider tag - " + other.gameObject.tag);
             oldCollider = other;
             if (numCollidersInContact < 1)
             {
@@ -173,8 +158,8 @@ public class RingCollision : MonoBehaviour
                 //experimentControllerScript.changeIntensityOfGhost(math.remap(0, 127, 0, 1, mistakeVector.magnitude));
 
                 mistakeDirection = mistakeVector.normalized;
-                float mistakeDepth = mistakeVector.magnitude;
-                experimentControllerScript.triggerMistakeFeedback(mistakeDirection, mistakeDepth);
+                //float mistakeDepth = mistakeVector.magnitude;
+                experimentControllerScript.triggerMistakeFeedback(other.tag.ToString(), mistakeDirection, mistakeVector);
                 mistakeLineObj.SetActive(true);
             }
         }
@@ -186,6 +171,16 @@ public class RingCollision : MonoBehaviour
             //experimentControllerScript.startStopRefController.SetActive(false);
             experimentControllerScript.solidRightHandController.SetActive(true);
             experimentControllerScript.ghostRightHandController.SetActive(false);
+        }
+        else if (other.tag == "StopZone")
+        {
+            Debug.Log("Level finished!");
+            experimentControllerScript.showLevelResult(((int)Time.time - levelStartTime));
+            //startStopLight.SetActive(true);
+            experimentControllerScript.feedbackEnabled = false;
+            //experimentControllerScript.startStopRefController.SetActive(true);
+            experimentControllerScript.solidRightHandController.SetActive(false);
+            experimentControllerScript.ghostRightHandController.SetActive(true);
         }
     }
 

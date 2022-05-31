@@ -134,10 +134,11 @@ public class FormHandlerScript : MonoBehaviour
             if (touchedObj == slider3DLineObj)
             {
                 print("Touching slider line");
-                print("remapping " + hapticDeviceArrow.clickLoc.x + " from " + hapticDeviceArrow.xMin + ',' + hapticDeviceArrow.xMax + " to " + formUIScript.xMin + ',' + formUIScript.xMax);
+                //print("hapticDeviceArrow.clickLoc.x - " + hapticDeviceArrow.clickLoc.x);
+                //print("remapping " + hapticDeviceArrow.clickLoc.x + " from " + hapticDeviceArrow.xMin + ',' + hapticDeviceArrow.xMax + " to " + formUIScript.xMin + ',' + formUIScript.xMax);
                 int newX = (int)math.remap(hapticDeviceArrow.xMin, hapticDeviceArrow.xMax, formUIScript.xMin, formUIScript.xMax, hapticDeviceArrow.clickLoc.x);
                 int clampedX = (int)math.clamp(newX, formUIScript.xMin, formUIScript.xMax);
-                print("clamped " + clampedX + " from " + newX);
+                //print("clamped " + clampedX + " from " + newX);
                 //int newX = (int)math.clamp(formUIScript.xMin, formUIScript.xMax, (int) math.remap(hapticDeviceArrow.xMin, hapticDeviceArrow.xMax, formUIScript.xMin, formUIScript.xMax, hapticDeviceArrow.clickLoc.x));
                 //print("newX: " + newX);
                 formUIScript.moveCrossToX(clampedX);

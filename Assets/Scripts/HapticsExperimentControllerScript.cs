@@ -21,18 +21,25 @@ public enum ExperimentState
     HILO_POST_SURVEY,
     POST_TEST_2
 };
+public enum FeedbackLevel
+{
+    LOW,
+    MEDIUM,
+    HIGH
+};
+
+public enum ExperimentalCondition
+{ 
+    GROUNDED,
+    VIBRATION,
+    NO_HAPTICS
+}
 
 public class HapticsExperimentControllerScript : MonoBehaviour
 {
-    public enum FeedbackLevel
-    {
-        LOW,
-        MEDIUM,
-        HIGH
-    };
-
     public FeedbackLevel feedbackLevel;
     public ExperimentState expState;
+    public static ExperimentalCondition expCondition;
     public SimpleTcpClient client;
 
     public int currLevel;
@@ -50,7 +57,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     public GameObject env;
 
     public AudioSource goSound;
-    public GameObject hookRoot;
+    public GameObject hookRoot, hook_difficulty_1_root, hook_difficulty_2_root, hook_difficulty_3_root;
     public GameObject cylinderPointer;
 
 
@@ -63,6 +70,12 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     public GameObject startStopRefController;
     public GameObject ghostRightHandController;
     public GameObject solidRightHandController;
+    public GameObject ghost_difficulty_1, ghost_difficulty_2, ghost_difficulty_3;
+    public GameObject solid_difficulty_1, solid_difficulty_2, solid_difficulty_3;
+
+    public GameObject levelTimeResultsObj;
+    public int levelTimeResult;
+
     //public GameObject snapSlot;
     //public GameObject rightHandAnchor;
     //bool checkSnapCondition;
@@ -74,6 +87,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
 
     public Vector3 projectedHookPos;
 
+    public GameObject lishengDeviceObj;
     public LishengDeviceControllerScript lishengDeviceController;
     public FormHandlerScript formHandler;
 
@@ -101,33 +115,19 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     string currDragDir;
     public Vector3 offsetPivotAng;
 
-    //public bool trainingPhase, tutorialPhase;
-
-    //[Header("Materials")]
-    //public Material lightOffMat;
-    //public Material lightOnMat;
-
-    //public GameObject mistakeLight;
 
     private void Awake()
     {
-        //testArduinoSerialController.portName = PlayerPrefs.GetString("testCOMPort", "not_set");
-        //Debug.Log("Test COM port set - " + testArduinoSerialController.portName);
+        testArduinoSerialController.portName = PlayerPrefs.GetString("testCOMPort", "not_set");
+        Debug.Log("Test COM port set - " + testArduinoSerialController.portName);
 
-        //testArduinoSerialControllerObj.SetActive(true);
+        testArduinoSerialControllerObj.SetActive(true);
 
-        /*if (PlayerPrefs.GetString("avatar_x", "not_set") == "not_set" || PlayerPrefs.GetString("avatar_y", "not_set") == "not_set" || PlayerPrefs.GetString("avatar_z", "not_set") == "not_set")
-        {
-            Debug.Log("Avatar pos not set");
-        }
-        else
-        {
-            print("Player prefs avatar_z" + PlayerPrefs.GetString("avatar_z", "not_set"));
-            //avatar.transform.position = new Vector3(float.Parse(PlayerPrefs.GetString("avatar_x", "not_set")), float.Parse(PlayerPrefs.GetString("avatar_y", "not_set")), float.Parse(PlayerPrefs.GetString("avatar_z", "not_set")));
-            avatar_x_slider.value = float.Parse(PlayerPrefs.GetString("avatar_x", "not_set"));
-            avatar_y_slider.value = float.Parse(PlayerPrefs.GetString("avatar_y", "not_set"));
-            avatar_z_slider.value = float.Parse(PlayerPrefs.GetString("avatar_z", "not_set"));
-        }*/
+        lishengDeviceObj.GetComponent<SerialController>().portName = PlayerPrefs.GetString("hapticCOMPort", "not_set");
+        Debug.Log("Lisheng Device COM port set - " + lishengDeviceObj.GetComponent<SerialController>().portName);
+
+        lishengDeviceObj.SetActive(true);
+
         if (PlayerPrefs.GetString("hapticEnv_x", "not_set") == "not_set" || PlayerPrefs.GetString("hapticEnv_y", "not_set") == "not_set" || PlayerPrefs.GetString("hapticEnv_z", "not_set") == "not_set")
         {
             Debug.Log("Haptic Env pos not set");
@@ -146,6 +146,8 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     {
         expState = ExperimentState.INIT;
         feedbackLevel = FeedbackLevel.MEDIUM;
+
+        expCondition = ExperimentalCondition.VIBRATION; //REMOVE!!
 
         //beepsound.mute = true;
         currLevel = 1;
@@ -177,6 +179,25 @@ public class HapticsExperimentControllerScript : MonoBehaviour
 
     }
 
+    public void selectExperimentCondition(string expCondStr)
+    {
+        switch (expCondStr)
+        {
+            case "GROUNDED":
+                expCondition = ExperimentalCondition.GROUNDED;
+                break;
+            case "VIBRATION":
+                expCondition = ExperimentalCondition.VIBRATION;
+                break;
+            case "NO_HAPTICS":
+                expCondition = ExperimentalCondition.NO_HAPTICS;
+                break;
+            default:
+                print("Invalid experimental condition");
+                break;
+        }
+    }
+
     public void toggleConfigMenu()
     {
         if (configMenu.activeSelf)
@@ -200,6 +221,12 @@ public class HapticsExperimentControllerScript : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+
+    public void showLevelResult(int _levelTimeResult)
+    {
+        levelTimeResultsObj.SetActive(true);
+        levelTimeResultsObj.transform.GetChild(0).GetChild(0).GetComponent<TMPro.TMP_Text>().text = "You took " + _levelTimeResult + " seconds to complete the level";
+    }
 
 
     public void changeState(string state)
@@ -391,6 +418,12 @@ public class HapticsExperimentControllerScript : MonoBehaviour
         level3.SetActive(false);
     }
 
+    void disableAllHookModels()
+    {
+
+        
+    }
+    
     public void moveToLevel(int level)
     {
         //modeTxt.text = "Training Mode On";
@@ -399,6 +432,11 @@ public class HapticsExperimentControllerScript : MonoBehaviour
         {
             setAllLevelsInactive();
             tutorial.SetActive(true);
+            hookRoot.SetActive(false);
+            hookRoot = hook_difficulty_1_root;
+            ghostRightHandController = ghost_difficulty_1;
+            solidRightHandController = solid_difficulty_1;
+            hookRoot.SetActive(true);
             /*currLevel = 1;
             //modeTxt.text = "Tutorial Mode On";
             tutorialPhase = true;
@@ -409,7 +447,13 @@ public class HapticsExperimentControllerScript : MonoBehaviour
         if (level == 1)
         {
             setAllLevelsInactive();
-            level1.SetActive(true);
+            levelTimeResultsObj.SetActive(false);
+            level3.SetActive(true);
+            hookRoot.SetActive(false);
+            hookRoot = hook_difficulty_1_root;
+            ghostRightHandController = ghost_difficulty_1;
+            solidRightHandController = solid_difficulty_1;
+            hookRoot.SetActive(true);
             /*tutorialPhase = false;
             currLevel = 1;
             tutorial.SetActive(false);
@@ -423,7 +467,13 @@ public class HapticsExperimentControllerScript : MonoBehaviour
         if (level == 2)
         {
             setAllLevelsInactive();
-            level2.SetActive(true);
+            levelTimeResultsObj.SetActive(false);
+            level3.SetActive(true);
+            hookRoot.SetActive(false);
+            hookRoot = hook_difficulty_2_root;
+            ghostRightHandController = ghost_difficulty_2;
+            solidRightHandController = solid_difficulty_2;
+            hookRoot.SetActive(true);
             /*tutorialPhase = false;
             currLevel = 2;
             env.transform.eulerAngles = new Vector3(0, -90, 0);
@@ -434,7 +484,13 @@ public class HapticsExperimentControllerScript : MonoBehaviour
         if (level == 3)
         {
             setAllLevelsInactive();
+            levelTimeResultsObj.SetActive(false);
             level3.SetActive(true);
+            hookRoot.SetActive(false);
+            hookRoot = hook_difficulty_3_root;
+            ghostRightHandController = ghost_difficulty_3;
+            solidRightHandController = solid_difficulty_3;
+            hookRoot.SetActive(true);
             /*tutorialPhase = false;
             currLevel = 3;
             env.transform.eulerAngles = new Vector3(0, -180, 0);
@@ -713,17 +769,28 @@ public class HapticsExperimentControllerScript : MonoBehaviour
         lishengDeviceController.vibrateInDirection(direction);
     }
     
-    public void triggerMistakeFeedback(Vector3 _mistakeDir, float _depth)
+    public void triggerMistakeFeedback(string dir, Vector3 _mistakeDir, Vector3 _mistakeVector)
     {
         isFeedbackOnNow = true;
-        vibrateInDirection(_mistakeDir);
-        print("Depth" + _depth);
-        //double[] zero = { 0.0, 0.0, 0.0 };
-        //double[] force = { 0.1 * _mistakeDir.x, 0.1 * _mistakeDir.y, 0.1 * _mistakeDir.z };
-        //HapticPlugin.setForce("Default Device", force, zero);
-        HapticsDeviceManager.SetForce(20.0f * _depth * new Vector3(0, _mistakeDir.y, _mistakeDir.z));
-        Debug.Log("triggerMistakeFeedback");
-        
+        print("mistakeVector" + _mistakeVector);
+        if (expCondition == ExperimentalCondition.VIBRATION)
+        {
+            vibrateInDirection(_mistakeDir);
+        }
+        else if(expCondition == ExperimentalCondition.GROUNDED)
+        {
+            //print("Depth" + _depth);
+            //double[] zero = { 0.0, 0.0, 0.0 };
+            //double[] force = { 0.1 * _mistakeDir.x, 0.1 * _mistakeDir.y, 0.1 * _mistakeDir.z };
+            //HapticPlugin.setForce("Default Device", force, zero);
+            if (dir == "x-axis") _mistakeVector.x = 0;
+            else if (dir == "y-axis") _mistakeVector.y = 0;
+            else if (dir == "z-axis") _mistakeVector.z = 0;
+            HapticsDeviceManager.SetForce(40f * _mistakeVector);
+            Debug.Log("triggerMistakeFeedback");
+        }
+
+
         //hapticArduinoSerialController.SendSerialMessage("1");
         //GetComponent<VibrationDemoScript>().TurnEffectOn();
         //StartCoroutine(Haptics(1, 1, 0.1f, true, false));

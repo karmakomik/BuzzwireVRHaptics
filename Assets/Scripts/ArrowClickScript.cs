@@ -11,7 +11,7 @@ public class ArrowClickScript : MonoBehaviour
     public GameObject sliderCylinderLine;
     public GameObject sliderHandle;
 
-    public float xMin = -0.1285837f, xMax = 0.379902f;
+    public float xMin, xMax;
 
     // Start is called before the first frame update
     void Start()
@@ -43,6 +43,7 @@ public class ArrowClickScript : MonoBehaviour
         if (other.gameObject.name == "SliderLine")
         {
             clickLoc = other.gameObject.GetComponent<Collider>().ClosestPointOnBounds(transform.position);
+           
             sliderHandle.transform.position = new Vector3(clickLoc.x + 0.018f, sliderHandle.transform.position.y, sliderHandle.transform.position.z);
         }
         //formHandler.moveCrossToX((int)sliderHandle.transform.position.x);

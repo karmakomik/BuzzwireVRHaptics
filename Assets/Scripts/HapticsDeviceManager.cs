@@ -37,11 +37,6 @@ public class HapticsDeviceManager : MonoBehaviour
         return new Vector4((float)arrayToUse[0], (float)arrayToUse[1], (float)arrayToUse[2], (float)arrayToUse[3]);
     }
 
-    //On application quit
-    void OnApplicationQuit()
-    {
-        print("closeDLL " + stopHaptics());
-    }
 
     [DllImport("GeomagicCommDLL")]
     public static extern bool prepareHaptics(double hapticScale);

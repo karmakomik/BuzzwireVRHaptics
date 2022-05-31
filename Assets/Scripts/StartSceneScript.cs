@@ -44,6 +44,28 @@ public class StartSceneScript : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    public void selectExperimentCondition(string expCondStr)
+    {
+        switch (expCondStr)
+        {
+            case "GROUNDED":
+                HapticsExperimentControllerScript.expCondition = ExperimentalCondition.GROUNDED;
+                startExperiment();
+                break;
+            case "VIBRATION":
+                HapticsExperimentControllerScript.expCondition = ExperimentalCondition.VIBRATION;
+                startExperiment();
+                break;
+            case "NO_HAPTICS":
+                HapticsExperimentControllerScript.expCondition = ExperimentalCondition.NO_HAPTICS;
+                startExperiment();
+                break;
+            default:
+                print("Invalid experimental condition");
+                break;
+        }
+    }
+
     public void startExperiment()
     {        
         SceneManager.LoadScene("BuzzwireHaptics");
