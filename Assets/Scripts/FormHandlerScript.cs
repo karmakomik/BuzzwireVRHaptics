@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FormHandlerScript : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class FormHandlerScript : MonoBehaviour
 
     List<GameObject> likert5Buttons;
     List<GameObject> likert7Buttons;
-    List<GameObject> likert4Buttons;
+    List<GameObject> likert4Buttons;   
 
     List<GameObject> buttonList;
 
@@ -22,13 +23,22 @@ public class FormHandlerScript : MonoBehaviour
     GameObject touchedObj;
 
     List<Action> surveyMethodsMediumPre, surveyMethodsMediumPost, surveyMethodsHiLoPre, surveyMethodsHiLoPost;
+    int[] surveyMethodsMediumPreResults, surveyMethodsMediumPostResults, surveyMethodsHiLoPreResults, surveyMethodsHiLoPostResults;
     public int methodCounterMediumPre, methodCounterMediumPost, methodCounterHiLoPre, methodCounterHiLoPost;
+
+    int introChoice, selfEfficacy1Choice, selfEfficacy2Choice, ageChoice, genderChoice, vrExpChoice;
+    int presence1Choice, presence2Choice, presence3Choice, presence4Choice, presence5Choice;
+    int NASATLXMentalChoice, NASATLXPhysicalChoice, NASATLXTemporalChoice, NASATLXPerformanceChoice, NASATLXEffortChoice, NASATLXFrustrationChoice;
+    int samChoice;
 
     public Material buttonActiveMat;
     public Material buttonInactiveMat;
+    public Material submitButtonIncompleteMat;
 
     public GameObject currentFormUI;
     public HapticsExperimentControllerScript hapticsExperimentController;
+
+    public GameObject submitMediumPreButtonObj, submitMediumPostButtonObj, submitHiLoPreButtonObj, submitHiLoPostButtonObj;
 
     public GameObject likert5Obj, likert4Obj, likert7Obj, slider3DLineObj, slider3DRootObj;
 
@@ -40,13 +50,16 @@ public class FormHandlerScript : MonoBehaviour
 
     public GameObject NASATLXMentalObj, NASATLXPhysicalObj, NASATLXTemporalObj, NASATLXPerformanceObj, NASATLXEffortObj, NASATLXFrustrationObj;
 
-
+    string surveyResponseTxt;
+    int prevResponse;
 
     //public ArrowClickScript arrowScript;
 
     // Start is called before the first frame update
     void Start()
     {
+        surveyResponseTxt = "";
+
         currLikertMode = LikertMode.NONE;
 
         methodCounterMediumPre = methodCounterMediumPost = 0;
@@ -57,7 +70,8 @@ public class FormHandlerScript : MonoBehaviour
         surveyMethodsMediumPre.Add(gotoAge);
         surveyMethodsMediumPre.Add(gotoGender);
         surveyMethodsMediumPre.Add(gotoVRExp);
-        surveyMethodsMediumPre.Add(surveyOver);
+        surveyMethodsMediumPre.Add(showMediumPreSurvey);
+        surveyMethodsMediumPreResults = new int[surveyMethodsMediumPre.Count - 1]; // -2 because we don't want to count the gotoIntro and showMediumPreSurvey methods ... Copilot generated this comment WTF!
 
         surveyMethodsMediumPost = new List<Action>();
         surveyMethodsMediumPost.Add(gotoSAM);
@@ -73,11 +87,17 @@ public class FormHandlerScript : MonoBehaviour
         surveyMethodsMediumPost.Add(gotoNASATLX_Performance);
         surveyMethodsMediumPost.Add(gotoNASATLX_Effort);
         surveyMethodsMediumPost.Add(gotoNASATLX_Frustration);
-        surveyMethodsMediumPost.Add(surveyOver);
+        surveyMethodsMediumPost.Add(showMediumPostSurvey);
+        surveyMethodsMediumPostResults = new int[surveyMethodsMediumPost.Count - 1];
+        
+        //surveyMethodsMediumPost.Add(surveyOver);
 
         surveyMethodsHiLoPre = new List<Action>(); 
         surveyMethodsHiLoPre.Add(gotoSelfEfficacy1);
-        surveyMethodsHiLoPre.Add(surveyOver);
+        surveyMethodsHiLoPre.Add(showHiLoPreSurvey);
+        surveyMethodsHiLoPreResults = new int[surveyMethodsHiLoPre.Count - 1];
+        
+        //surveyMethodsHiLoPre.Add(surveyOver);
 
         surveyMethodsHiLoPost = new List<Action>();
         surveyMethodsHiLoPost.Add(gotoSAM);
@@ -93,7 +113,10 @@ public class FormHandlerScript : MonoBehaviour
         surveyMethodsHiLoPost.Add(gotoNASATLX_Performance);
         surveyMethodsHiLoPost.Add(gotoNASATLX_Effort);
         surveyMethodsHiLoPost.Add(gotoNASATLX_Frustration);
-        surveyMethodsHiLoPost.Add(surveyOver);
+        surveyMethodsHiLoPost.Add(showHiLoPostSurvey);
+        surveyMethodsHiLoPostResults = new int[surveyMethodsHiLoPost.Count - 1];
+        
+        //surveyMethodsHiLoPost.Add(surveyOver);
 
 
         //Remove this
@@ -133,11 +156,16 @@ public class FormHandlerScript : MonoBehaviour
 
             if (touchedObj == slider3DLineObj)
             {
+                okButtonObj.SetActive(true);
                 print("Touching slider line");
                 //print("hapticDeviceArrow.clickLoc.x - " + hapticDeviceArrow.clickLoc.x);
                 //print("remapping " + hapticDeviceArrow.clickLoc.x + " from " + hapticDeviceArrow.xMin + ',' + hapticDeviceArrow.xMax + " to " + formUIScript.xMin + ',' + formUIScript.xMax);
                 int newX = (int)math.remap(hapticDeviceArrow.xMin, hapticDeviceArrow.xMax, formUIScript.xMin, formUIScript.xMax, hapticDeviceArrow.clickLoc.x);
                 int clampedX = (int)math.clamp(newX, formUIScript.xMin, formUIScript.xMax);
+                int selectedVal = (int)math.remap(hapticDeviceArrow.xMin, hapticDeviceArrow.xMax, 1, 21, hapticDeviceArrow.clickLoc.x);
+                int clampedSelectedVal = (int)math.clamp(selectedVal, 1, 21);
+                prevResponse = clampedSelectedVal;
+                print("clampedSelectedVal " + clampedSelectedVal);
                 //print("clamped " + clampedX + " from " + newX);
                 //int newX = (int)math.clamp(formUIScript.xMin, formUIScript.xMax, (int) math.remap(hapticDeviceArrow.xMin, hapticDeviceArrow.xMax, formUIScript.xMin, formUIScript.xMax, hapticDeviceArrow.clickLoc.x));
                 //print("newX: " + newX);
@@ -165,14 +193,18 @@ public class FormHandlerScript : MonoBehaviour
             {
                 if (buttonList.Contains(touchedObj))
                 {
+                    okButtonObj.SetActive(true);
                     //Set the current likert level to the index of the button in likert5buttons
                     currLikertLevel = buttonList.IndexOf(touchedObj);
 
                     print("currLikertLevel" + currLikertLevel);
+                    prevResponse = (currLikertLevel + 1);
+                    //surveyResponseTxt += "" + (currLikertLevel + 1);
+
                     //Set all objects in buttonList to inactive material
                     foreach (GameObject button in buttonList)
                     {
-                        button.GetComponent<Renderer>().material = buttonInactiveMat;
+                        button.GetComponent<Renderer>().material = buttonInactiveMat; 
                     }
                     //Set the selected button to active material                
                     touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
@@ -238,11 +270,19 @@ public class FormHandlerScript : MonoBehaviour
     {
         if (methodCounterMediumPre < surveyMethodsMediumPre.Count - 1)
         {
+            if (methodCounterMediumPre > 0 && methodCounterMediumPre < surveyMethodsMediumPreResults.Length)
+            {
+                print("methodCounterMediumPre " + methodCounterMediumPre);
+                surveyMethodsMediumPreResults[methodCounterMediumPre] = prevResponse;
+                surveyResponseTxt += "" + prevResponse;
+                print("Current surveyResponseTxt - " + surveyResponseTxt);
+            }
             methodCounterMediumPre++;
             //touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
             //prevButtonObj.SetActive(false);
             //nextButtonObj.SetActive(false);
             surveyMethodsMediumPre[methodCounterMediumPre]();
+            prevResponse = 0;
         }
         else
             print("No next question");
@@ -264,11 +304,20 @@ public class FormHandlerScript : MonoBehaviour
     {
         if (methodCounterMediumPost < surveyMethodsMediumPost.Count - 1)
         {
+            if (methodCounterMediumPost > -1 && methodCounterMediumPost < surveyMethodsMediumPostResults.Length)
+            {
+                print("methodCounterMediumPost " + methodCounterMediumPost);
+                surveyMethodsMediumPostResults[methodCounterMediumPost] = prevResponse;
+                surveyResponseTxt += "" + prevResponse;
+                print("Current surveyResponseTxt - " + surveyResponseTxt);
+            }
+
             methodCounterMediumPost++;
             //touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
             //prevButtonObj.SetActive(false);
             //nextButtonObj.SetActive(false);
             surveyMethodsMediumPost[methodCounterMediumPost]();
+            prevResponse = 0;
         }
         else
             print("No next question");
@@ -291,11 +340,20 @@ public class FormHandlerScript : MonoBehaviour
     {
         if (methodCounterHiLoPre < surveyMethodsHiLoPre.Count - 1)
         {
+            if (methodCounterHiLoPre == 0)
+            {
+                print("methodCounterHiLoPre " + methodCounterHiLoPre);
+                surveyMethodsHiLoPreResults[methodCounterHiLoPre] = prevResponse;
+                surveyResponseTxt += "" + prevResponse;
+                print("Current surveyResponseTxt - " + surveyResponseTxt);
+            }
+
             methodCounterHiLoPre++;
             //touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
             //prevButtonObj.SetActive(false);
             //nextButtonObj.SetActive(false);
             surveyMethodsHiLoPre[methodCounterHiLoPre]();
+            prevResponse = 0;
         }
         else
             print("No next question");
@@ -317,6 +375,14 @@ public class FormHandlerScript : MonoBehaviour
     {
         if (methodCounterHiLoPost < surveyMethodsHiLoPost.Count - 1)
         {
+            if (methodCounterHiLoPost > -1 && methodCounterHiLoPost < surveyMethodsHiLoPostResults.Length)
+            {
+                print("methodCounterHiLoPost " + methodCounterHiLoPost);
+                surveyMethodsHiLoPostResults[methodCounterHiLoPost] = prevResponse;
+                surveyResponseTxt += "" + prevResponse;
+                print("Current surveyResponseTxt - " + surveyResponseTxt);
+            }
+          
             methodCounterHiLoPost++;
             //touchedObj.GetComponent<Renderer>().material = buttonActiveMat;
             //prevButtonObj.SetActive(false);
@@ -329,35 +395,39 @@ public class FormHandlerScript : MonoBehaviour
 
     public void startSurveyHiLoPre()
     {
-        okButtonObj.SetActive(true);
+        okButtonObj.SetActive(false);
         methodCounterHiLoPre = -1;
+        surveyResponseTxt = "HI_LO_PRE_";
         gotoNextHiLoPreQ();
     }
 
     public void startSurveyHiLoPost()
     {
-        okButtonObj.SetActive(true);
+        okButtonObj.SetActive(false);
         methodCounterHiLoPost = -1;
+        surveyResponseTxt = "HI_LO_POST_";
         gotoNextHiLoPostQ();
     }
 
     public void startSurveyMediumPre()
     {
-        okButtonObj.SetActive(true);
+        okButtonObj.SetActive(false);
         methodCounterMediumPre = -1;
+        surveyResponseTxt = "MEDIUM_PRE_";
         gotoNextMediumPreQ();
     }
 
     public void startSurveyMediumPost()
     {
-        okButtonObj.SetActive(true);
-        methodCounterMediumPost = -1;   
+        okButtonObj.SetActive(false);
+        methodCounterMediumPost = -1;
+        surveyResponseTxt = "MEDIUM_POST_";
         gotoNextMediumPostQ();    
     }
 
 
     public void gotoIntro()
-    {
+    {        
         okButtonObj.SetActive(true);
         okButtonObj.GetComponent<Renderer>().material = buttonInactiveMat;
         introObj.SetActive(true);
@@ -366,7 +436,9 @@ public class FormHandlerScript : MonoBehaviour
     }
 
     public void gotoSelfEfficacy1()
-    {        
+    {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",Eff_1_Res_";
         selfefficacy1Obj.SetActive(true);
         ageObj.SetActive(false);
         introObj.SetActive(false);
@@ -380,6 +452,8 @@ public class FormHandlerScript : MonoBehaviour
 
     public void gotoAge()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",Age_Res_";
         ageObj.SetActive(true);
         selfefficacy1Obj.SetActive(false);
         genderObj.SetActive(false);
@@ -393,6 +467,8 @@ public class FormHandlerScript : MonoBehaviour
 
     public void gotoGender()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",Gender_Res_";
         genderObj.SetActive(true);
         ageObj.SetActive(false);
         vrExpObj.SetActive(false);
@@ -406,6 +482,8 @@ public class FormHandlerScript : MonoBehaviour
 
     public void gotoVRExp()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",VRExp_Res_";
         vrExpObj.SetActive(true);
         genderObj.SetActive(false);
         currentFormUI = vrExpObj;
@@ -419,6 +497,8 @@ public class FormHandlerScript : MonoBehaviour
    
     public void gotoSAM()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",SAM_Res_";
         vrExpObj.SetActive(false);
         samScaleObj.SetActive(true);
         currentFormUI = samScaleObj;
@@ -432,6 +512,8 @@ public class FormHandlerScript : MonoBehaviour
 
     public void gotoSelfEfficacy2()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",Eff_2_Res_";
         samScaleObj.SetActive(false);
         selfefficacy2Obj.SetActive(true);
         currentFormUI = selfefficacy2Obj;
@@ -444,6 +526,8 @@ public class FormHandlerScript : MonoBehaviour
 
     public void gotoPresence1()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",Pres_1_Res_";
         selfefficacy2Obj.SetActive(false);
         likert5Obj.SetActive(false);
         currentFormUI = presence1ScaleObj;
@@ -456,6 +540,8 @@ public class FormHandlerScript : MonoBehaviour
 
     public void gotoPresence2()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",Pres_2_Res_";
         presence1ScaleObj.SetActive(false);
         currentFormUI = presence2ScaleObj;
         presence2ScaleObj.SetActive(true);
@@ -466,6 +552,8 @@ public class FormHandlerScript : MonoBehaviour
 
     public void gotoPresence3()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",Pres_3_Res_";
         presence2ScaleObj.SetActive(false);
         currentFormUI = presence3ScaleObj;
         presence3ScaleObj.SetActive(true);
@@ -476,6 +564,8 @@ public class FormHandlerScript : MonoBehaviour
 
     public void gotoPresence4()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",Pres_4_Res_";
         presence3ScaleObj.SetActive(false);
         currentFormUI = presence4ScaleObj;
         presence4ScaleObj.SetActive(true);
@@ -485,6 +575,8 @@ public class FormHandlerScript : MonoBehaviour
     }
     public void gotoPresence5()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",Pres_5_Res_";
         presence4ScaleObj.SetActive(false);
         currentFormUI = presence5ScaleObj;
         presence5ScaleObj.SetActive(true);
@@ -496,6 +588,8 @@ public class FormHandlerScript : MonoBehaviour
 
     public void gotoNASATLX_Mental()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",NASATLX_Mental_Res_";
         likert7Obj.SetActive(false);
         presence5ScaleObj.SetActive(false);
         currentFormUI = NASATLXMentalObj;
@@ -508,6 +602,8 @@ public class FormHandlerScript : MonoBehaviour
 
     public void gotoNASATLX_Physical()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",NASATLX_Physical_Res_";
         NASATLXMentalObj.SetActive(false);
         currentFormUI = NASATLXPhysicalObj;
         NASATLXPhysicalObj.SetActive(true);
@@ -517,6 +613,8 @@ public class FormHandlerScript : MonoBehaviour
     }
     public void gotoNASATLX_Temporal()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",NASATLX_Temporal_Res_";
         NASATLXPhysicalObj.SetActive(false);
         currentFormUI = NASATLXTemporalObj;
         NASATLXTemporalObj.SetActive(true);
@@ -527,6 +625,8 @@ public class FormHandlerScript : MonoBehaviour
 
     public void gotoNASATLX_Performance()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",NASATLX_Performance_Res_";
         NASATLXTemporalObj.SetActive(false);
         currentFormUI = NASATLXPerformanceObj;
         NASATLXPerformanceObj.SetActive(true);
@@ -536,6 +636,8 @@ public class FormHandlerScript : MonoBehaviour
     }
     public void gotoNASATLX_Effort()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",NASATLX_Effort_Res_";
         NASATLXPerformanceObj.SetActive(false);
         currentFormUI = NASATLXEffortObj;
         NASATLXEffortObj.SetActive(true);
@@ -546,6 +648,8 @@ public class FormHandlerScript : MonoBehaviour
 
     public void gotoNASATLX_Frustration()
     {
+        okButtonObj.SetActive(false);
+        surveyResponseTxt += ",NASATLX_Frustration_Res_";
         NASATLXEffortObj.SetActive(false);
         currentFormUI = NASATLXFrustrationObj;
         NASATLXFrustrationObj.SetActive(true);
@@ -554,8 +658,47 @@ public class FormHandlerScript : MonoBehaviour
         hapticDeviceArrow.resetSlider();
     }
 
-    public void surveyOver()
+    static string removeDuplicates(string s)
     {
+        char[] S = s.ToCharArray();
+        int n = S.Length;
+
+        // We don't need to do anything for
+        // empty or single character string.
+        if (n < 2)
+        {
+            return "";
+        }
+
+        // j is used to store index is result
+        // string (or index of current distinct
+        // character)
+        int j = 0;
+
+        // Traversing string
+        for (int i = 1; i < n; i++)
+        {
+            // If current character S[i]
+            // is different from S[j]
+            if (S[j] != S[i])
+            {
+                j++;
+                S[j] = S[i];
+            }
+        }
+        char[] A = new char[j + 1];
+        Array.Copy(S, 0, A, 0, j + 1);
+        return new string(A);
+    }
+
+    /*public void surveyOver()
+    {
+        //surveyResponseTxt = removeDuplicates(surveyResponseTxt);
+        print("surveyResponseTxt " + surveyResponseTxt);
+        if (hapticsExperimentController.client != null)
+            hapticsExperimentController.client.Write("M;1;;;" + surveyResponseTxt + ";\r\n");
+
+        surveyResponseTxt = "";
         selfefficacy1Obj.SetActive(false);
         vrExpObj.SetActive(false);
         NASATLXFrustrationObj.SetActive(false);
@@ -569,6 +712,190 @@ public class FormHandlerScript : MonoBehaviour
         okButtonObj.SetActive(false);
         resetAllScales();
         //Send results to imotions
+    }*/
+
+    public void showMediumPreSurvey()
+    {
+        submitMediumPreButtonObj.SetActive(true);
+    }
+
+    //Print contents of array
+    public void printArray(int[] arr)
+    {
+        string s = "";
+        for (int i = 0; i < arr.Length; i++)
+        {
+            s += arr[i] + " ";
+        }
+        print(s);
+    }
+    
+    public void mediumPreSurveyOver()
+    {
+        var surveyMethodsMediumPreResultsNew = new List<int>(surveyMethodsMediumPreResults).GetRange(1, surveyMethodsMediumPreResults.Length-1).ToArray();
+        //Check if surveyMethodsMediumPreResults has any 0 in it
+        if (ContainsZero(surveyMethodsMediumPreResultsNew, 0))
+        {
+            printArray(surveyMethodsMediumPreResultsNew);
+            print("Some answers were not answered in medium pre");
+            //print("surveyResponseTxt " + surveyResponseTxt);
+            surveyResponseTxt = "MEDIUM_PRE_";
+            surveyMethodsMediumPreResults = new int[surveyMethodsMediumPre.Count - 1];
+            submitMediumPreButtonObj.GetComponent<Image>().color = Color.red;
+        }
+        else
+        {
+            print("mediumPreSurveyOver");
+            submitMediumPreButtonObj.SetActive(false);
+            print("surveyResponseTxt " + surveyResponseTxt);
+            //submitMediumPreButtonObj.SetActive(false);
+            if (hapticsExperimentController.client != null)
+                hapticsExperimentController.client.Write("M;1;;;" + surveyResponseTxt + ";\r\n");
+
+
+            surveyResponseTxt = "";
+            selfefficacy1Obj.SetActive(false);
+            vrExpObj.SetActive(false);
+            NASATLXFrustrationObj.SetActive(false);
+            //currentFormUI = null;
+            likert4Obj.SetActive(false);
+            likert5Obj.SetActive(false);
+            likert7Obj.SetActive(false);
+
+            slider3DRootObj.SetActive(false);
+            okButtonObj.GetComponent<Renderer>().material = buttonInactiveMat;
+            okButtonObj.SetActive(false);
+            resetAllScales();
+        }
+    }
+
+    public void showMediumPostSurvey()
+    {
+        submitMediumPostButtonObj.SetActive(true);
+    }
+
+    public void mediumPostSurveyOver()
+    {        
+        if (ContainsZero(surveyMethodsMediumPostResults,0))
+        {
+            printArray(surveyMethodsMediumPostResults);
+            print("Some answers were not answered in medium post");
+            print("surveyResponseTxt " + surveyResponseTxt);
+            surveyResponseTxt = "MEDIUM_POST_";
+            surveyMethodsMediumPostResults = new int[surveyMethodsMediumPost.Count - 1];
+            submitMediumPostButtonObj.GetComponent<Image>().color = Color.red;
+            //submitMediumPostButtonObj.GetComponent<Renderer>().material = submitButtonIncompleteMat;
+        }
+        else
+        {
+            print("mediumPostSurveyOver");
+            submitMediumPostButtonObj.SetActive(false);
+            print("surveyResponseTxt " + surveyResponseTxt);
+            if (hapticsExperimentController.client != null)
+                hapticsExperimentController.client.Write("M;1;;;" + surveyResponseTxt + ";\r\n");
+
+
+            surveyResponseTxt = "";
+            selfefficacy1Obj.SetActive(false);
+            vrExpObj.SetActive(false);
+            NASATLXFrustrationObj.SetActive(false);
+            //currentFormUI = null;
+            likert4Obj.SetActive(false);
+            likert5Obj.SetActive(false);
+            likert7Obj.SetActive(false);
+
+            slider3DRootObj.SetActive(false);
+            okButtonObj.GetComponent<Renderer>().material = buttonInactiveMat;
+            okButtonObj.SetActive(false);
+            resetAllScales();
+        }
+    }
+
+    public void showHiLoPreSurvey()
+    {
+        submitHiLoPreButtonObj.SetActive(true);
+    }
+
+    public static bool ContainsZero(Array a, object val)
+    {
+        return Array.IndexOf(a, val) != -1;
+    }
+
+    public void hiloPreSurveyOver()
+    {
+        if (ContainsZero(surveyMethodsHiLoPreResults,0))
+        {
+            print("Some answers were not answered in hilo pre");
+            print("surveyResponseTxt " + surveyResponseTxt);
+            surveyResponseTxt = "HILO_PRE_";
+            surveyMethodsHiLoPreResults = new int[surveyMethodsHiLoPre.Count - 1];
+            submitHiLoPreButtonObj.GetComponent<Image>().color = Color.red;
+            //submitHiLoPreButtonObj.GetComponent<Renderer>().material = submitButtonIncompleteMat;
+        }
+        else
+        {
+            print("hiloPreSurveyOver");
+            submitHiLoPreButtonObj.SetActive(false);
+            print("surveyResponseTxt " + surveyResponseTxt);
+            if (hapticsExperimentController.client != null)
+                hapticsExperimentController.client.Write("M;1;;;" + surveyResponseTxt + ";\r\n");
+
+            surveyResponseTxt = "";
+            selfefficacy1Obj.SetActive(false);
+            vrExpObj.SetActive(false);
+            NASATLXFrustrationObj.SetActive(false);
+            //currentFormUI = null;
+            likert4Obj.SetActive(false);
+            likert5Obj.SetActive(false);
+            likert7Obj.SetActive(false);
+
+            slider3DRootObj.SetActive(false);
+            okButtonObj.GetComponent<Renderer>().material = buttonInactiveMat;
+            okButtonObj.SetActive(false);
+            resetAllScales();
+        }
+    }
+
+    public void showHiLoPostSurvey()
+    {
+        submitHiLoPostButtonObj.SetActive(true);
+    }
+
+    public void hiloPostSurveyOver()
+    {
+        if (ContainsZero(surveyMethodsHiLoPostResults,0))
+        {
+            //print(surveyMethodsHiLoPostResults);
+            print("Some answers were not answered in Hilo post");
+            //print("surveyResponseTxt " + surveyResponseTxt);
+            surveyResponseTxt = "HILO_POST_";
+            surveyMethodsHiLoPostResults = new int[surveyMethodsHiLoPost.Count - 1];
+
+            submitHiLoPostButtonObj.GetComponent<Image>().color = Color.red;
+            //submitHiLoPostButtonObj.GetComponent<Renderer>().material = submitButtonIncompleteMat;
+        }
+        else
+        {
+            print("hiloPostSurveyOver");
+            submitHiLoPostButtonObj.SetActive(false);
+            print("surveyResponseTxt " + surveyResponseTxt);
+            if (hapticsExperimentController.client != null)
+                hapticsExperimentController.client.Write("M;1;;;" + surveyResponseTxt + ";\r\n");
+
+
+            selfefficacy1Obj.SetActive(false);
+            vrExpObj.SetActive(false);
+            NASATLXFrustrationObj.SetActive(false);
+            //currentFormUI = null;
+            likert4Obj.SetActive(false);
+            likert5Obj.SetActive(false);
+            likert7Obj.SetActive(false);
+
+            slider3DRootObj.SetActive(false);
+            okButtonObj.GetComponent<Renderer>().material = buttonInactiveMat;
+            okButtonObj.SetActive(false);
+            resetAllScales();
+        }
     }
 
 }

@@ -27,7 +27,7 @@ public class LishengDeviceControllerScript : MonoBehaviour
 
     public void vibrateInDirection(Vector3 direction)
     {
-        print("vibrate in direction" + direction);
+        //print("vibrate in direction" + direction);
         int vibration_a = 0, vibration_b = 0, vibration_c = 0, vibration_d = 0, vibration_e = 0, vibration_f = 0;
 
         if (direction.magnitude != 0)

@@ -16,7 +16,10 @@ public class RingCollision : MonoBehaviour
     private Vector3 mistakeVector;
     Vector3 mistakeDirection;
     int levelStartTime;
+    public GameObject hapticPointer;
 
+    int partNumAtTimeOfDetaching = 0, partNumAtTimeOfReattaching = 0;
+   
 
     // Start is called before the first frame update
     void Start()
@@ -36,10 +39,19 @@ public class RingCollision : MonoBehaviour
             mistakeLineObj.GetComponent<LineRenderer>().SetPosition(0, transform.position);
             mistakeLineObj.GetComponent<LineRenderer>().SetPosition(1, experimentControllerScript.projectedHookPos);
             mistakeVector = experimentControllerScript.projectedHookPos - transform.position;            
-            print("mistakeVector.magnitude" + mistakeVector.magnitude);
+            //print("mistakeVector.magnitude" + mistakeVector.magnitude);
             float intensity = math.remap(0, 0.1f, 0, 1, mistakeVector.magnitude);
             float clampedIntensity = math.clamp(intensity, 0, 1);
-
+            if (clampedIntensity < 0.4f)
+            {
+                mistakeLineObj.GetComponent<LineRenderer>().startColor = Color.black;
+                mistakeLineObj.GetComponent<LineRenderer>().endColor = Color.black;
+            }
+            else
+            {
+                mistakeLineObj.GetComponent<LineRenderer>().startColor = Color.red;
+                mistakeLineObj.GetComponent<LineRenderer>().endColor = Color.red;
+            }
             experimentControllerScript.changeIntensityOfGhost(clampedIntensity);
 
             //print("mistakeDirection - " + mistakeDirection);
@@ -48,17 +60,28 @@ public class RingCollision : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        //Debug.Log("Number of colliders in contact - " + numCollidersInContact);
         ++numCollidersInContact;
         //Debug.Log("Object in contact - " + other.gameObject);
         if (other.tag != "StartZone" && other.tag != "StopZone" && experimentControllerScript.feedbackEnabled)
         {
-
             if (experimentControllerScript.feedbackEnabled)
             {
-                experimentControllerScript.doControllerReattachOperations(other.gameObject.tag);
-                experimentControllerScript.stopMistakeFeedback();
-                mistakeLineObj.SetActive(false);
+                if (other.gameObject.name.StartsWith("Part"))
+                {
+                    partNumAtTimeOfReattaching = int.Parse(other.gameObject.name.Substring(4));
+
+                    if (partNumAtTimeOfReattaching == partNumAtTimeOfDetaching || partNumAtTimeOfReattaching == partNumAtTimeOfDetaching + 1)
+                    {
+                        print("Reattaching to correct part");
+                        experimentControllerScript.doControllerReattachOperations(other.gameObject.tag);
+                        experimentControllerScript.stopMistakeFeedback();
+                        mistakeLineObj.SetActive(false);
+                    }
+                    else
+                    {
+                        print("Reattaching to wrong part");
+                    }
+                }
             }
             else
             {
@@ -88,26 +111,10 @@ public class RingCollision : MonoBehaviour
             experimentControllerScript.solidRightHandController.SetActive(true);
             experimentControllerScript.ghostRightHandController.SetActive(false);
         }
+            
+        
     }
 
-
-    /*public void delayEnableOldCollider(Collider collider)
-    {
-        StartCoroutine(delayEnableColliderCoRoutine(collider));
-    }
-
-    //Placing this here because I disable all coroutines in gamemanager during every transition
-    public IEnumerator delayEnableColliderCoRoutine(Collider collider)
-    {
-        int seconds = 1;
-        while (seconds > 0)
-        {
-            yield return new WaitForSecondsRealtime(1);
-            seconds--;
-        }
-        collider.enabled = true;
-        //Debug.Log("delayResetNewTasksFlag");
-    }*/
 
     private void OnTriggerStay(Collider other)
     {
@@ -142,30 +149,32 @@ public class RingCollision : MonoBehaviour
         --numCollidersInContact;
         if (other.tag != "StartZone" && other.tag != "StopZone" && experimentControllerScript.feedbackEnabled)
         {
-            //startStopLight.SetActive(false);
-
-            //Debug.Log("Exit from " + other.gameObject);
-            Debug.Log("Collider tag - " + other.gameObject.tag);
-            oldCollider = other;
-            if (numCollidersInContact < 1)
+            Debug.Log("Haptic pointer z angle " + hapticPointer.transform.localEulerAngles.z);
+            if (numCollidersInContact < 1 && !experimentControllerScript.isFeedbackOnNow)
             {
                 //Debug.Log("Number of colliders in contact is less than 1. Triggering feedback");
                 //currCollider = null;
-                experimentControllerScript.doControllerDetachOperations((CapsuleCollider)other, other.gameObject.tag, loc);
-                //experimentControllerScript.triggerMistakeFeedback();
-                //Find the vector between the two points
-                mistakeVector = experimentControllerScript.projectedHookPos - transform.position;
-                //experimentControllerScript.changeIntensityOfGhost(math.remap(0, 127, 0, 1, mistakeVector.magnitude));
+                if (other.gameObject.name.StartsWith("Part"))
+                {
+                    partNumAtTimeOfDetaching = int.Parse(other.gameObject.name.Substring(4));
 
-                mistakeDirection = mistakeVector.normalized;
-                //float mistakeDepth = mistakeVector.magnitude;
-                experimentControllerScript.triggerMistakeFeedback(other.tag.ToString(), mistakeDirection, mistakeVector);
-                mistakeLineObj.SetActive(true);
+                    experimentControllerScript.doControllerDetachOperations((CapsuleCollider)other, other.gameObject.tag, loc);
+                    //experimentControllerScript.triggerMistakeFeedback();
+                    //Find the vector between the two points
+                    mistakeVector = experimentControllerScript.projectedHookPos - transform.position;
+                    //experimentControllerScript.changeIntensityOfGhost(math.remap(0, 127, 0, 1, mistakeVector.magnitude));
+
+                    mistakeDirection = mistakeVector.normalized;
+                    //float mistakeDepth = mistakeVector.magnitude;
+                    experimentControllerScript.triggerMistakeFeedback(other.tag.ToString(), mistakeDirection, mistakeVector);
+                    
+                }
             }
         }
         else if (other.tag == "StartZone")
         {
             Debug.Log("Level started!");
+            levelStartTime = (int)Time.time;
             //if(!experimentControllerScript.tutorialPhase) other.enabled = false;
             experimentControllerScript.feedbackEnabled = true;
             //experimentControllerScript.startStopRefController.SetActive(false);
@@ -182,6 +191,7 @@ public class RingCollision : MonoBehaviour
             experimentControllerScript.solidRightHandController.SetActive(false);
             experimentControllerScript.ghostRightHandController.SetActive(true);
         }
+        
     }
 
     /*private void OnDrawGizmos()

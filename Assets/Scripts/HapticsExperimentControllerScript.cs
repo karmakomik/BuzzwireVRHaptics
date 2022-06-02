@@ -70,8 +70,9 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     public GameObject startStopRefController;
     public GameObject ghostRightHandController;
     public GameObject solidRightHandController;
-    public GameObject ghost_difficulty_1, ghost_difficulty_2, ghost_difficulty_3;
-    public GameObject solid_difficulty_1, solid_difficulty_2, solid_difficulty_3;
+    public GameObject ghost_difficulty_1;//, ghost_difficulty_2, ghost_difficulty_3;
+    public GameObject ghost_wire, ghost_handle;
+    public GameObject solid_difficulty_1;//, solid_difficulty_2, solid_difficulty_3;
 
     public GameObject levelTimeResultsObj;
     public int levelTimeResult;
@@ -86,7 +87,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     public bool isFeedbackOnNow = false;
 
     public Vector3 projectedHookPos;
-
+    public GameObject mistakeLineObj;
     public GameObject lishengDeviceObj;
     public LishengDeviceControllerScript lishengDeviceController;
     public FormHandlerScript formHandler;
@@ -101,6 +102,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
 
     //UI
     public TMPro.TMP_Text modeTxt;
+    public TMPro.TMP_Text conditionTxt;
     public TMPro.TMP_Text iMotionsConnText;
     public Image leftSwitchIndicator, rightSwitchIndicator, mistakeIndicator;
     public GameObject baselineOverIndicator;
@@ -119,6 +121,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     private void Awake()
     {
         testArduinoSerialController.portName = PlayerPrefs.GetString("testCOMPort", "not_set");
+        
         Debug.Log("Test COM port set - " + testArduinoSerialController.portName);
 
         testArduinoSerialControllerObj.SetActive(true);
@@ -127,6 +130,19 @@ public class HapticsExperimentControllerScript : MonoBehaviour
         Debug.Log("Lisheng Device COM port set - " + lishengDeviceObj.GetComponent<SerialController>().portName);
 
         lishengDeviceObj.SetActive(true);
+
+        if (PlayerPrefs.GetString("avatar_x", "not_set") == "not_set" || PlayerPrefs.GetString("avatar_y", "not_set") == "not_set" || PlayerPrefs.GetString("avatar_z", "not_set") == "not_set")
+        {
+            Debug.Log("Avatar pos not set");
+        }
+        else
+        {
+            //print("Player prefs avatar_z" + PlayerPrefs.GetString("avatar_z", "not_set"));
+            //avatar.transform.position = new Vector3(float.Parse(PlayerPrefs.GetString("avatar_x", "not_set")), float.Parse(PlayerPrefs.GetString("avatar_y", "not_set")), float.Parse(PlayerPrefs.GetString("avatar_z", "not_set")));
+            avatar_x_slider.value = float.Parse(PlayerPrefs.GetString("avatar_x", "not_set"));
+            avatar_y_slider.value = float.Parse(PlayerPrefs.GetString("avatar_y", "not_set"));
+            avatar_z_slider.value = float.Parse(PlayerPrefs.GetString("avatar_z", "not_set"));
+        }
 
         if (PlayerPrefs.GetString("hapticEnv_x", "not_set") == "not_set" || PlayerPrefs.GetString("hapticEnv_y", "not_set") == "not_set" || PlayerPrefs.GetString("hapticEnv_z", "not_set") == "not_set")
         {
@@ -147,7 +163,13 @@ public class HapticsExperimentControllerScript : MonoBehaviour
         expState = ExperimentState.INIT;
         feedbackLevel = FeedbackLevel.MEDIUM;
 
-        expCondition = ExperimentalCondition.VIBRATION; //REMOVE!!
+        if(expCondition == ExperimentalCondition.GROUNDED)
+            conditionTxt.text = "Grounded";
+        else if (expCondition == ExperimentalCondition.NO_HAPTICS)
+            conditionTxt.text = "No Haptics";
+        else if (expCondition == ExperimentalCondition.VIBRATION)
+            conditionTxt.text = "Vibration";
+        //expCondition = ExperimentalCondition.VIBRATION; //REMOVE!!
 
         //beepsound.mute = true;
         currLevel = 1;
@@ -212,9 +234,9 @@ public class HapticsExperimentControllerScript : MonoBehaviour
 
     public void saveConfig()
     {
-        //PlayerPrefs.SetString("avatar_x", avatar_x_slider.value.ToString());
-        //PlayerPrefs.SetString("avatar_y", avatar_y_slider.value.ToString());
-        //PlayerPrefs.SetString("avatar_z", avatar_z_slider.value.ToString());
+        PlayerPrefs.SetString("avatar_x", avatar_x_slider.value.ToString());
+        PlayerPrefs.SetString("avatar_y", avatar_y_slider.value.ToString());
+        PlayerPrefs.SetString("avatar_z", avatar_z_slider.value.ToString());
         PlayerPrefs.SetString("hapticEnv_x", hapticEnv_x_slider.value.ToString());
         PlayerPrefs.SetString("hapticEnv_y", hapticEnv_y_slider.value.ToString());
         PlayerPrefs.SetString("hapticEnv_z", hapticEnv_z_slider.value.ToString());
@@ -225,7 +247,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     public void showLevelResult(int _levelTimeResult)
     {
         levelTimeResultsObj.SetActive(true);
-        levelTimeResultsObj.transform.GetChild(0).GetChild(0).GetComponent<TMPro.TMP_Text>().text = "You took " + _levelTimeResult + " seconds to complete the level";
+        levelTimeResultsObj.transform.GetChild(0).GetChild(0).GetComponent<TMPro.TMP_Text>().text = "You took " + _levelTimeResult + " seconds. \n Come on, you can do it faster!";
     }
 
 
@@ -271,6 +293,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
             case "MEDIUM_PRE_SURVEY":
                 env.SetActive(false);
                 hookRoot.SetActive(false);
+                levelTimeResultsObj.SetActive(false);
                 cylinderPointer.SetActive(true);
                 surveyPanel.SetActive(true);
                 formHandler.startSurveyMediumPre();
@@ -282,6 +305,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
             case "MEDIUM_POST_SURVEY":
                 env.SetActive(false);
                 hookRoot.SetActive(false);
+                levelTimeResultsObj.SetActive(false);
                 cylinderPointer.SetActive(true);
                 surveyPanel.SetActive(true);
                 formHandler.startSurveyMediumPost();
@@ -293,6 +317,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
             case "HILO_PRE_SURVEY":
                 env.SetActive(false);
                 hookRoot.SetActive(false);
+                levelTimeResultsObj.SetActive(false);
                 cylinderPointer.SetActive(true);
                 surveyPanel.SetActive(true);
                 formHandler.startSurveyHiLoPre();
@@ -304,6 +329,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
             case "HILO_POST_SURVEY":
                 env.SetActive(false);
                 hookRoot.SetActive(false);
+                levelTimeResultsObj.SetActive(false);
                 cylinderPointer.SetActive(true);
                 surveyPanel.SetActive(true);
                 formHandler.startSurveyHiLoPost();
@@ -374,7 +400,8 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     {
         // Change alpha of ghostRightHandController material
         ghostRightHandController.GetComponent<Renderer>().material.color = new Color(ghostRightHandController.GetComponent<Renderer>().material.color.r, ghostRightHandController.GetComponent<Renderer>().material.color.g, ghostRightHandController.GetComponent<Renderer>().material.color.b, level);
-
+        //ghost_handle.GetComponent<Renderer>().material.color = new Color(ghostRightHandController.GetComponent<Renderer>().material.color.r, ghostRightHandController.GetComponent<Renderer>().material.color.g, ghostRightHandController.GetComponent<Renderer>().material.color.b, level);
+        ghost_wire.GetComponent<Renderer>().material.color = new Color(ghostRightHandController.GetComponent<Renderer>().material.color.r, ghostRightHandController.GetComponent<Renderer>().material.color.g, ghostRightHandController.GetComponent<Renderer>().material.color.b, level);
     }
 
     public void startBaseline()
@@ -426,6 +453,8 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     
     public void moveToLevel(int level)
     {
+        mistakeLineObj.GetComponent<LineRenderer>().startColor = Color.black;
+        mistakeLineObj.GetComponent<LineRenderer>().endColor = Color.black;
         //modeTxt.text = "Training Mode On";
         //trainingPhase = true;
         if (level == 0)
@@ -448,7 +477,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
         {
             setAllLevelsInactive();
             levelTimeResultsObj.SetActive(false);
-            level3.SetActive(true);
+            level1.SetActive(true);
             hookRoot.SetActive(false);
             hookRoot = hook_difficulty_1_root;
             ghostRightHandController = ghost_difficulty_1;
@@ -460,19 +489,21 @@ public class HapticsExperimentControllerScript : MonoBehaviour
             level1.SetActive(true);
             env.transform.eulerAngles = new Vector3(0, 0, 0);
             //goSound.Play();
-            //if (client != null)
+            /if (client != null)
             //client.Write("M;1;;;level_1_started;Level 1 started\r\n");
             */
+            if (client != null)
+                client.Write("M;1;;;level_1_started;\r\n");
         }
         if (level == 2)
         {
             setAllLevelsInactive();
             levelTimeResultsObj.SetActive(false);
-            level3.SetActive(true);
+            level2.SetActive(true);
             hookRoot.SetActive(false);
-            hookRoot = hook_difficulty_2_root;
-            ghostRightHandController = ghost_difficulty_2;
-            solidRightHandController = solid_difficulty_2;
+            hookRoot = hook_difficulty_1_root;
+            ghostRightHandController = ghost_difficulty_1;
+            solidRightHandController = solid_difficulty_1;
             hookRoot.SetActive(true);
             /*tutorialPhase = false;
             currLevel = 2;
@@ -480,6 +511,8 @@ public class HapticsExperimentControllerScript : MonoBehaviour
             //goSound.Play();
             //if (client != null)
             //client.Write("M;1;;;level_2_started;Level 2 started\r\n");*/
+            if (client != null)
+                client.Write("M;1;;;level_2_started;\r\n");
         }
         if (level == 3)
         {
@@ -487,9 +520,9 @@ public class HapticsExperimentControllerScript : MonoBehaviour
             levelTimeResultsObj.SetActive(false);
             level3.SetActive(true);
             hookRoot.SetActive(false);
-            hookRoot = hook_difficulty_3_root;
-            ghostRightHandController = ghost_difficulty_3;
-            solidRightHandController = solid_difficulty_3;
+            hookRoot = hook_difficulty_1_root;
+            ghostRightHandController = ghost_difficulty_1;
+            solidRightHandController = solid_difficulty_1;
             hookRoot.SetActive(true);
             /*tutorialPhase = false;
             currLevel = 3;
@@ -497,6 +530,8 @@ public class HapticsExperimentControllerScript : MonoBehaviour
             //goSound.Play();
             //if (client != null)
             //client.Write("M;1;;;level_3_started;Level 3 started\r\n");*/
+            if (client != null)
+                client.Write("M;1;;;level_3_started;\r\n");
         }
 
         //startStopRefController.transform.position = startPositions[currLevel - 1];
@@ -518,6 +553,8 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     {
         hapticEnv.transform.position = new Vector3(hapticEnv.transform.position.x, hapticEnv.transform.position.y, z);
     }
+
+    
 
     public void changeAvatar_x(float x)
     {
@@ -640,6 +677,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
             message = null;
             if (isDetached && feedbackEnabled)
             {
+                mistakeLineObj.SetActive(true);
                 //StartCoroutine(Haptics(1, 1, 0.1f, true, false));
                 if (client != null && expState != ExperimentState.VR_TUTORIAL)
                     client.Write("M;1;;;BuzzWireHitVR;\r\n");
@@ -671,9 +709,11 @@ public class HapticsExperimentControllerScript : MonoBehaviour
                     if (projectedHookPos.z < currCollider.bounds.max.z && projectedHookPos.z > currCollider.bounds.min.z)
                         detachPivot.transform.position = projectedHookPos;
                 }
+                //mistakeLineObj.SetActive(true);
             }
             else
             {
+                mistakeLineObj.SetActive(false);
                 //Debug.Log("isDetached = false");
             }
         }
@@ -772,7 +812,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
     public void triggerMistakeFeedback(string dir, Vector3 _mistakeDir, Vector3 _mistakeVector)
     {
         isFeedbackOnNow = true;
-        print("mistakeVector" + _mistakeVector);
+        //print("mistakeVector" + _mistakeVector);
         if (expCondition == ExperimentalCondition.VIBRATION)
         {
             vibrateInDirection(_mistakeDir);
