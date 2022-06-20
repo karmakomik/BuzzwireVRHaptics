@@ -76,7 +76,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
 
     public float hapticStiffnessHigh = 2.55f;//2.125f;
     public float hapticStiffnessMedium = 1.7f;
-    public float hapticStiffnessLow = 0.5f;
+    public float hapticStiffnessLow = 0.85f;
     public float currHapticStiffness;
 
     public GameObject levelTimeResultsObj;
@@ -168,7 +168,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
         expState = ExperimentState.INIT;
         feedbackLevel = FeedbackLevel.MEDIUM;
 
-        expCondition = ExperimentalCondition.GROUNDED; //REMOVE!!
+        //expCondition = ExperimentalCondition.GROUNDED; //REMOVE!!
 
         if (expCondition == ExperimentalCondition.GROUNDED)
             conditionTxt.text = "Grounded";
