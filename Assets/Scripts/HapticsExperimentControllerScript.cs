@@ -367,6 +367,7 @@ public class HapticsExperimentControllerScript : MonoBehaviour
                     client.Write("M;1;;;training_high_started;\r\n");
                 break;
             case "TRAINING_2_LOW_FEEDBACK":
+                env.SetActive(true);
                 hookRoot.SetActive(true);
                 cylinderPointer.SetActive(false);
                 expState = ExperimentState.TRAINING_2_LOW_FEEDBACK;
