@@ -1,0 +1,1 @@
+The levels were created for the INRIA project using the Unity Plumber procedural pipe generation script (https://github.com/federicocasares/unity-plumber) and exported using Unity's FBX Exporter plugin (https://docs.unity3d.com/Packages/com.unity.formats.fbx@2.0/manual/index.html)
