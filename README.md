@@ -7,8 +7,9 @@ This repository contains the Unity and Arduino project files developed for the s
 - Unity 2019.4.25f1
 - Touch driver version 2021.9.21
 
-#Hardware Requirements
+# Hardware Requirements
 
+- Oculus Rift
 - Geomagic Touch
 - Custom handle (see screenshots) - Not required, but needed for vibration condition to work as expected
 
